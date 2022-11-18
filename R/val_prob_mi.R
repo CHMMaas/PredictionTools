@@ -1,4 +1,4 @@
-#' @title val_prob_mi
+#' @title val.prob.mi
 #' @description This function calculates intercept, slope, and C-index for outcome risk predictions of multiple imputed data set(s).
 #'
 #' @importFrom rms Predict

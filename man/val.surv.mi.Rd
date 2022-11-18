@@ -2,7 +2,7 @@
 % Please edit documentation in R/val_surv_mi.R
 \name{val.surv.mi}
 \alias{val.surv.mi}
-\title{val_surv_mi}
+\title{val.surv.mi}
 \usage{
 val.surv.mi(
   p,

@@ -1,4 +1,4 @@
-#' @title val_surv_mi
+#' @title val.surv.mi
 #' @description This function calculates intercept, slope, and C-index for survival risk predictions of multiple imputed data set(s).
 #'
 #' @importFrom rms Predict

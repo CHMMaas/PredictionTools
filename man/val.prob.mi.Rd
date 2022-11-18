@@ -2,7 +2,7 @@
 % Please edit documentation in R/val_prob_mi.R
 \name{val.prob.mi}
 \alias{val.prob.mi}
-\title{val_prob_mi}
+\title{val.prob.mi}
 \usage{
 val.prob.mi(lp.mi, y, g = 5, main = "", dist = FALSE)
 }
