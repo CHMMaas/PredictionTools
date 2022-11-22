@@ -150,12 +150,16 @@ val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE){
 
   stopifnot("lp.mi and y must be the same length" = nrow(lp.mi)==length(y) | length(lp.mi)==length(y))
 
+  # initialize number of observations
   n <- length(y)
+
+  # initialize number of imputations
   m.imp.val<-ncol(lp.mi)
   if (is.null(m.imp.val)){
     m.imp.val <- 1
   }
 
+  # initialize statistic vectors
   cindex<-rep(0,m.imp.val)
   cindex.se<-rep(0,m.imp.val)
   slope<-rep(0,m.imp.val)
@@ -168,10 +172,10 @@ val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE){
   E.90<-rep(0,m.imp.val)
   mbc<-rep(0,m.imp.val)
   sm.y<-NULL
-
   p.groups<-array(rep(0,g*m.imp.val),dim=c(m.imp.val,g),dimnames=list(1:m.imp.val,1:g))
   y.groups<-array(rep(0,2*g*m.imp.val),dim=c(m.imp.val,g,2),dimnames=list(1:m.imp.val,1:g,c("obs","se")))
 
+  # calculate metrics for each imputation
   for (i in 1:m.imp.val)
   {
     if (m.imp.val!=1){
@@ -184,24 +188,26 @@ val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE){
     f.val<-stats::glm(y~lp.val,family='binomial')
     f.val.offset<-stats::glm(y~offset(lp.val),family='binomial')
 
-    #cindex[i]<-f.val$stats["C"]
-
+    # C-index
     rc<-rcorr.cens(lp.val,y)
     cindex[i]<-rc["C Index"]
     cindex.se[i]<-rc["S.D."]/2
+    #cindex[i]<-f.val$stats["C"]
 
+    # slope
     slope[i]<-f.val$coefficients[[2]]
     slope.se[i]<-sqrt(vcov(f.val)[[2,2]])
 
+    # intercept
     int[i]<-f.val.offset$coefficients[[1]]
     int.se[i]<-sqrt(vcov(f.val.offset)[[1,1]])
 
+    # create g quantiles of predicted risk
     p.val<-stats::plogis(lp.val)
     quants<-stats::quantile(p.val,(1:(g-1))/g)
     cuts<-cut(p.val,breaks=c(0,quants,1))
     p.groups[i,]<-tapply(p.val,cuts,mean)
-    for (j in 1:g)
-    {
+    for (j in 1:g) {
       sub<-(cuts==levels(cuts)[j])
       if (sum(y[sub])>0){
         f.0<-stats::glm(y~1,family = 'binomial',subset=sub)
@@ -209,14 +215,17 @@ val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE){
         y.groups[i,j,2]<-sqrt(vcov(f.0)[1,1])} else {y.groups[i,j,]<- -Inf}
     }
 
+    # model-based concordance
+    mbc[i]<-mb.c(as.vector(p.val))
+
+    # calculate E-average and E-90
     Sm <- stats::loess(y~p.val,degree=2)
     sm.y<-cbind(sm.y,stats::predict(Sm,newdata=data.frame(p.val=(0:100)/100)))
     E.avg[i]<-mean(abs(Sm$x-Sm$fitted))
     E.90[i]<-stats::quantile(abs(Sm$x-Sm$fitted),.9)
-    mbc[i]<-mb.c(as.vector(p.val))
-
   }
 
+  # plot g quantiles by combining over imputations
   p.mi<-colMeans(p.groups)
   obs.mi<-rep(0,g)
   obs.mi.lower<-rep(0,g)
@@ -241,23 +250,25 @@ val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE){
   graphics::segments(p.mi,obs.mi.lower,p.mi,obs.mi.upper)
   graphics::points(p.mi,obs.mi,pch=20)
 
+  # combine statistics over m imputations
   int.mi<-Rubin.combine(int,int.se)
   slope.mi<-Rubin.combine(slope,slope.se)
   cindex.mi<-Rubin.combine(cindex,cindex.se)
-  mbc.mi<-mean(mbc) #mb.c(stats::plogis(as.vector(lp.mi)))
-  E.avg.mi<-mean(E.avg) ## Standard errors unclear
-  E.90.mi<-mean(E.90) ## Standard errors unclear
+  mbc.mi<-mean(mbc)       #mb.c(stats::plogis(as.vector(lp.mi)))
+  E.avg.mi<-mean(E.avg)   ## Standard errors unclear
+  E.90.mi<-mean(E.90)     ## Standard errors unclear
 
+  # add statistics to plot
   graphics::legend(lim[1], lim[2], c(paste("n =",format(n,big.mark=",")),
                            paste("a =",format(round(int.mi$est,2),nsmall=2)),
                            paste("b =",format(round(slope.mi$est,2),nsmall=2)),
                            paste("c =",format(round(cindex.mi$est,2),nsmall=2)),
                            paste("mb.c =",format(round(mbc.mi,2),nsmall=2)),
-                           paste("e =",format(round(E.avg.mi,3),nsmall=3)),
+                           paste("e.avg =",format(round(E.avg.mi,3),nsmall=3)),
                            paste("e.90 =",format(round(E.90.mi,3),nsmall=3))),
          box.col="white",  bg = "white",cex=1)
 
-  # Histogram of risk distribution
+  # histogram of risk distribution
   line.bins <- 0.05
   length.seg <- 1
   dist.label <- 0.04
@@ -265,7 +276,6 @@ val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE){
   d0lab <- 0
   d1lab <- 1
   cex.d01 <- 0.7
-
   if (dist){
     if (m.imp.val > 1){
       x <- rowMeans(stats::plogis(lp.mi))
@@ -286,9 +296,9 @@ val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE){
     f0	<-(0.1*f0)/maxf
     f1	<-(0.1*f1)/maxf
 
-    segments(bins1,line.bins,bins1,length.seg*f1+line.bins)
-    segments(bins0,line.bins,bins0,length.seg*-f0+line.bins)
-    lines(c(min(bins0,bins1)-0.01,max(bins0,bins1)+0.01),c(line.bins,line.bins))
+    graphics::segments(bins1,line.bins,bins1,length.seg*f1+line.bins)
+    graphics::segments(bins0,line.bins,bins0,length.seg*-f0+line.bins)
+    graphics::lines(c(min(bins0,bins1)-0.01,max(bins0,bins1)+0.01),c(line.bins,line.bins))
     graphics::text(max(bins0,bins1)+dist.label,line.bins+dist.label2,d1lab,cex=cex.d01)
     graphics::text(max(bins0,bins1)+dist.label,line.bins-dist.label2,d0lab,cex=cex.d01)
   }
