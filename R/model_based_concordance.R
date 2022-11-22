@@ -14,6 +14,7 @@
 #'
 #' @examples
 #' library(PredictionTools)
+#' set.seed(1)
 #' n <- 100
 #' p.hat <- runif(n, 0, 1)
 #' PredictionTools::mb.c(p.hat=p.hat)

@@ -118,6 +118,7 @@ This function calculates intercept, slope, and C-index for outcome risk predicti
 }
 \examples{
 library(PredictionTools)
+set.seed(1)
 n <- 100
 m <- 5 # number of imputations
 lp.val <- matrix(rnorm(n*m, 0, 1), n, m)

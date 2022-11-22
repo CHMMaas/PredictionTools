@@ -115,6 +115,7 @@
 #' @examples
 #' library(PredictionTools)
 #' library(survival)
+#' set.seed(1)
 #' n <- 100
 #' m <- 5 # number of imputations
 #' p <- matrix(runif(n*m, 0, 1), n, m)

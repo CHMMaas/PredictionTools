@@ -131,6 +131,7 @@
 #'
 #' @examples
 #' library(PredictionTools)
+#' set.seed(1)
 #' n <- 100
 #' m <- 5 # number of imputations
 #' lp.val <- matrix(rnorm(n*m, 0, 1), n, m)
@@ -238,7 +239,7 @@ val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE){
     obs.mi.upper[j]<-stats::plogis(RC$est+qnorm(.975)*RC$se)
   }
 
-  lim<-c(0,0.5)
+  lim<-c(0,1)
   graphics::par(mar = c(5,5,2,1))
   graphics::plot(lim,lim,type='l',xlab="Predicted probability",ylab="Observed frequency",main=main,lwd=1,bty='n')
   graphics::lines(lim,lim)
@@ -296,9 +297,12 @@ val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE){
     f0	<-(0.1*f0)/maxf
     f1	<-(0.1*f1)/maxf
 
+    # verticle lines
     graphics::segments(bins1,line.bins,bins1,length.seg*f1+line.bins)
     graphics::segments(bins0,line.bins,bins0,length.seg*-f0+line.bins)
+    # horizontal line
     graphics::lines(c(min(bins0,bins1)-0.01,max(bins0,bins1)+0.01),c(line.bins,line.bins))
+    # text indicating ones and zeros
     graphics::text(max(bins0,bins1)+dist.label,line.bins+dist.label2,d1lab,cex=cex.d01)
     graphics::text(max(bins0,bins1)+dist.label,line.bins-dist.label2,d0lab,cex=cex.d01)
   }
