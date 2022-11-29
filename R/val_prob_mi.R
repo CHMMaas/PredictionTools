@@ -298,10 +298,10 @@ val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE){
     f1	<-(0.1*f1)/maxf
 
     # verticle lines
-    graphics::segments(bins1,line.bins,bins1,length.seg*f1+line.bins)
-    graphics::segments(bins0,line.bins,bins0,length.seg*-f0+line.bins)
+    graphics::segments(bins1,line.bins,bins1,length.seg*f1+line.bins, col="grey")
+    graphics::segments(bins0,line.bins,bins0,length.seg*-f0+line.bins, col="grey")
     # horizontal line
-    graphics::lines(c(min(bins0,bins1)-0.01,max(bins0,bins1)+0.01),c(line.bins,line.bins))
+    graphics::lines(c(min(bins0,bins1)-0.01,max(bins0,bins1)+0.01),c(line.bins,line.bins), col="grey")
     # text indicating ones and zeros
     graphics::text(max(bins0,bins1)+dist.label,line.bins+dist.label2,d1lab,cex=cex.d01)
     graphics::text(max(bins0,bins1)+dist.label,line.bins-dist.label2,d0lab,cex=cex.d01)

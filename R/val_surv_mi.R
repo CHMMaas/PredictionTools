@@ -257,7 +257,7 @@ val.surv.mi<-function(p, y, g=5, main="", time=NULL,
     f0	<-f0[j0]
     maxf <-max(f0)
     f0	<-(0.1*f0)/maxf
-    graphics::segments(bins0,line.bins,bins0,length.seg*f0+line.bins)
+    graphics::segments(bins0,line.bins,bins0,length.seg*f0+line.bins, col="grey")
   }
 
   int.mi<-Rubin.combine(int,int.se)
