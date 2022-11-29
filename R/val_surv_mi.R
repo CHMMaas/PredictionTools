@@ -201,26 +201,6 @@ val.surv.mi<-function(p, y, g=5, main="", time=NULL,
     }
   }
 
-  if (dist){
-    line.bins <- 0.0
-    length.seg <- 1
-    dist.label <- 0.04
-    dist.label2 <- 0.03
-    d0lab <- 0
-    d1lab <- 1
-    cex.d01 <- 0.7
-    x <- rowMeans(p)
-    bins <- seq(0, min(1,max(lim[2])), length = 101)
-    x <- x[x >= 0 & x <= 1]
-    f0	<-table(cut(x,bins))
-    j0	<-f0 > 0
-    bins0 <-(bins[-101])[j0]
-    f0	<-f0[j0]
-    maxf <-max(f0)
-    f0	<-(0.1*f0)/maxf
-    graphics::segments(bins0,line.bins,bins0,length.seg*f0+line.bins, col="grey")
-  }
-
   p.mi<-colMeans(p.groups)
   obs.mi<-rep(0,g)
   obs.mi.lower<-rep(0,g)
@@ -248,6 +228,26 @@ val.surv.mi<-function(p, y, g=5, main="", time=NULL,
 
   graphics::par(mar = c(5,5,2,1))
   plot(lim,lim,type='l',xlab="Predicted probability",ylab="Observed frequency",main=main,lwd=1,bty='n')
+
+  if (dist){
+    line.bins <- 0.0
+    length.seg <- 1
+    dist.label <- 0.04
+    dist.label2 <- 0.03
+    d0lab <- 0
+    d1lab <- 1
+    cex.d01 <- 0.7
+    x <- rowMeans(p)
+    bins <- seq(0, min(1,max(lim[2])), length = 101)
+    x <- x[x >= 0 & x <= 1]
+    f0	<-table(cut(x,bins))
+    j0	<-f0 > 0
+    bins0 <-(bins[-101])[j0]
+    f0	<-f0[j0]
+    maxf <-max(f0)
+    f0	<-(0.1*f0)/maxf
+    graphics::segments(bins0,line.bins,bins0,length.seg*f0+line.bins, col="grey")
+  }
 
   if (CI){
     graphics::polygon(x=c(p.sm.mi,rev(p.sm.mi)),y=c(obs.sm.mi.lower,rev(obs.sm.mi.upper)),border = NA,col="Lightgray")

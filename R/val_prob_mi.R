@@ -234,6 +234,26 @@ val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE){
   d0lab <- 0
   d1lab <- 1
   cex.d01 <- 0.7
+
+  # plot g quantiles by combining over imputations
+  p.mi<-colMeans(p.groups)
+  obs.mi<-rep(0,g)
+  obs.mi.lower<-rep(0,g)
+  obs.mi.upper<-rep(0,g)
+  for (j in 1:g)
+  {
+    RC<-Rubin.combine(y.groups[,j,1],y.groups[,j,2])
+    obs.mi[j]<-stats::plogis(RC$est)
+    obs.mi.lower[j]<-stats::plogis(RC$est+qnorm(.025)*RC$se)
+    obs.mi.upper[j]<-stats::plogis(RC$est+qnorm(.975)*RC$se)
+  }
+
+  lim<-c(0,1)
+  graphics::par(mar = c(5,5,2,1))
+  graphics::plot(lim,lim,type='l',xlab="Predicted probability",ylab="Observed frequency",main=main,lwd=1,bty='n')
+  graphics::lines(lim,lim)
+  graphics::abline(v=quants,col="darkgrey",lwd=1,lty=2)
+
   if (dist){
     if (m.imp.val > 1){
       x <- rowMeans(stats::plogis(lp.mi))
@@ -263,25 +283,6 @@ val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE){
     graphics::text(max(bins0,bins1)+dist.label,line.bins+dist.label2,d1lab,cex=cex.d01)
     graphics::text(max(bins0,bins1)+dist.label,line.bins-dist.label2,d0lab,cex=cex.d01)
   }
-
-  # plot g quantiles by combining over imputations
-  p.mi<-colMeans(p.groups)
-  obs.mi<-rep(0,g)
-  obs.mi.lower<-rep(0,g)
-  obs.mi.upper<-rep(0,g)
-  for (j in 1:g)
-  {
-    RC<-Rubin.combine(y.groups[,j,1],y.groups[,j,2])
-    obs.mi[j]<-stats::plogis(RC$est)
-    obs.mi.lower[j]<-stats::plogis(RC$est+qnorm(.025)*RC$se)
-    obs.mi.upper[j]<-stats::plogis(RC$est+qnorm(.975)*RC$se)
-  }
-
-  lim<-c(0,1)
-  graphics::par(mar = c(5,5,2,1))
-  graphics::plot(lim,lim,type='l',xlab="Predicted probability",ylab="Observed frequency",main=main,lwd=1,bty='n')
-  graphics::lines(lim,lim)
-  graphics::abline(v=quants,col="darkgrey",lwd=1,lty=2)
 
   sm.y.mi<-rowMeans(sm.y)
   lines((0:100)/100,sm.y.mi,col="dark gray",lwd=2,lty=2)
