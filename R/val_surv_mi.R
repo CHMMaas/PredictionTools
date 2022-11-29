@@ -201,6 +201,26 @@ val.surv.mi<-function(p, y, g=5, main="", time=NULL,
     }
   }
 
+  if (dist){
+    line.bins <- 0.0
+    length.seg <- 1
+    dist.label <- 0.04
+    dist.label2 <- 0.03
+    d0lab <- 0
+    d1lab <- 1
+    cex.d01 <- 0.7
+    x <- rowMeans(p)
+    bins <- seq(0, min(1,max(lim[2])), length = 101)
+    x <- x[x >= 0 & x <= 1]
+    f0	<-table(cut(x,bins))
+    j0	<-f0 > 0
+    bins0 <-(bins[-101])[j0]
+    f0	<-f0[j0]
+    maxf <-max(f0)
+    f0	<-(0.1*f0)/maxf
+    graphics::segments(bins0,line.bins,bins0,length.seg*f0+line.bins, col="grey")
+  }
+
   p.mi<-colMeans(p.groups)
   obs.mi<-rep(0,g)
   obs.mi.lower<-rep(0,g)
@@ -239,26 +259,6 @@ val.surv.mi<-function(p, y, g=5, main="", time=NULL,
 
   graphics::segments(p.mi,obs.mi.lower,p.mi,obs.mi.upper)
   graphics::points(p.mi,obs.mi,pch=20)
-
-  if (dist){
-    line.bins <- 0.0
-    length.seg <- 1
-    dist.label <- 0.04
-    dist.label2 <- 0.03
-    d0lab <- 0
-    d1lab <- 1
-    cex.d01 <- 0.7
-    x <- rowMeans(p)
-    bins <- seq(0, min(1,max(lim[2])), length = 101)
-    x <- x[x >= 0 & x <= 1]
-    f0	<-table(cut(x,bins))
-    j0	<-f0 > 0
-    bins0 <-(bins[-101])[j0]
-    f0	<-f0[j0]
-    maxf <-max(f0)
-    f0	<-(0.1*f0)/maxf
-    graphics::segments(bins0,line.bins,bins0,length.seg*f0+line.bins, col="grey")
-  }
 
   int.mi<-Rubin.combine(int,int.se)
   slope.mi<-Rubin.combine(slope,slope.se)

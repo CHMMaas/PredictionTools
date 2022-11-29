@@ -226,6 +226,44 @@ val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE){
     E.90[i]<-stats::quantile(abs(Sm$x-Sm$fitted),.9)
   }
 
+  # histogram of risk distribution
+  line.bins <- 0.05
+  length.seg <- 1
+  dist.label <- 0.04
+  dist.label2 <- 0.03
+  d0lab <- 0
+  d1lab <- 1
+  cex.d01 <- 0.7
+  if (dist){
+    if (m.imp.val > 1){
+      x <- rowMeans(stats::plogis(lp.mi))
+    } else{
+      x <- stats::plogis(lp.mi)
+    }
+    bins <- seq(0, min(1,max(lim[2])), length = 101)
+    x <- x[x >= 0 & x <= 1]
+    f0	<-table(cut(x[y==0],bins))
+    f1	<-table(cut(x[y==1],bins))
+    j0	<-f0 > 0
+    j1	<-f1 > 0
+    bins0 <-(bins[-101])[j0]
+    bins1 <-(bins[-101])[j1]
+    f0	<-f0[j0]
+    f1	<-f1[j1]
+    maxf <-max(f0,f1)
+    f0	<-(0.1*f0)/maxf
+    f1	<-(0.1*f1)/maxf
+
+    # verticle lines
+    graphics::segments(bins1,line.bins,bins1,length.seg*f1+line.bins, col="grey")
+    graphics::segments(bins0,line.bins,bins0,length.seg*-f0+line.bins, col="grey")
+    # horizontal line
+    graphics::lines(c(min(bins0,bins1)-0.01,max(bins0,bins1)+0.01),c(line.bins,line.bins), col="grey")
+    # text indicating ones and zeros
+    graphics::text(max(bins0,bins1)+dist.label,line.bins+dist.label2,d1lab,cex=cex.d01)
+    graphics::text(max(bins0,bins1)+dist.label,line.bins-dist.label2,d0lab,cex=cex.d01)
+  }
+
   # plot g quantiles by combining over imputations
   p.mi<-colMeans(p.groups)
   obs.mi<-rep(0,g)
@@ -268,44 +306,6 @@ val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE){
                            paste("e.avg =",format(round(E.avg.mi,3),nsmall=3)),
                            paste("e.90 =",format(round(E.90.mi,3),nsmall=3))),
          box.col="white",  bg = "white",cex=1)
-
-  # histogram of risk distribution
-  line.bins <- 0.05
-  length.seg <- 1
-  dist.label <- 0.04
-  dist.label2 <- 0.03
-  d0lab <- 0
-  d1lab <- 1
-  cex.d01 <- 0.7
-  if (dist){
-    if (m.imp.val > 1){
-      x <- rowMeans(stats::plogis(lp.mi))
-    } else{
-      x <- stats::plogis(lp.mi)
-    }
-    bins <- seq(0, min(1,max(lim[2])), length = 101)
-    x <- x[x >= 0 & x <= 1]
-    f0	<-table(cut(x[y==0],bins))
-    f1	<-table(cut(x[y==1],bins))
-    j0	<-f0 > 0
-    j1	<-f1 > 0
-    bins0 <-(bins[-101])[j0]
-    bins1 <-(bins[-101])[j1]
-    f0	<-f0[j0]
-    f1	<-f1[j1]
-    maxf <-max(f0,f1)
-    f0	<-(0.1*f0)/maxf
-    f1	<-(0.1*f1)/maxf
-
-    # verticle lines
-    graphics::segments(bins1,line.bins,bins1,length.seg*f1+line.bins, col="grey")
-    graphics::segments(bins0,line.bins,bins0,length.seg*-f0+line.bins, col="grey")
-    # horizontal line
-    graphics::lines(c(min(bins0,bins1)-0.01,max(bins0,bins1)+0.01),c(line.bins,line.bins), col="grey")
-    # text indicating ones and zeros
-    graphics::text(max(bins0,bins1)+dist.label,line.bins+dist.label2,d1lab,cex=cex.d01)
-    graphics::text(max(bins0,bins1)+dist.label,line.bins-dist.label2,d0lab,cex=cex.d01)
-  }
 
   return(list(main=main,
               n=n,
