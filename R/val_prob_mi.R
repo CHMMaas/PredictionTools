@@ -300,7 +300,7 @@ val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE){
 
   # add statistics to plot
   graphics::legend(lim[1], lim[2], c(paste("n =",format(n,big.mark=",")),
-                                     paste("p =",format(round(sum(y)/n, 2),big.mark=",")),
+                                     paste("p =",format(round(sum(y)/n, 2), nsmall=2)),
                            paste("a =",format(round(int.mi$est,2),nsmall=2)),
                            paste("b =",format(round(slope.mi$est,2),nsmall=2)),
                            paste("c =",format(round(cindex.mi$est,2),nsmall=2)),
