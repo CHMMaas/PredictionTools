@@ -305,10 +305,10 @@ val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE){
                            paste("b =",format(round(slope.mi$est,2),nsmall=2)),
                            paste("c =",format(round(cindex.mi$est,2),nsmall=2)),
                            paste("mb.c =",format(round(mbc.mi,2),nsmall=2)),
-                           paste("e.avg =",format(round(E.avg.mi,3),nsmall=3),
-                                 "(", format(round(E.avg.mi/(sum(y)/n),3),nsmall=3), ")"),
-                           paste("e.90 =",format(round(E.90.mi,3),nsmall=3),
-                                 "(", format(round(E.90.mi/(sum(y)/n),3),nsmall=3), ")")),
+                           paste0("e.avg = ",format(round(E.avg.mi,3),nsmall=3),
+                                 " (", format(round(E.avg.mi/(sum(y)/n),3),nsmall=3), ")"),
+                           paste0("e.90 = ",format(round(E.90.mi,3),nsmall=3),
+                                 " (", format(round(E.90.mi/(sum(y)/n),3),nsmall=3), ")")),
          box.col="white",  bg = "white",cex=1)
 
   return(list(main=main,
