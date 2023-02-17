@@ -1,5 +1,5 @@
 #' @title mb.c
-#' @description This function calculates the model-based concordance based on predicted probabilities.
+#' @description This function calculates the model-based concordance based on predicted probabilities for binary outcomes.
 #'
 #'
 #' @param p.hat Predicted probabilities
