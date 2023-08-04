@@ -1,5 +1,5 @@
 # PredictionTools
-This package is under development and for personal use only. It includes various metrics that can be used to validate predictions.
+This package is under development and for personal use only. It includes various metrics that can be used to validate predictions. Please contact me at c.h.m.maas@erasmusmc.nl if you encounter any issues.
 
 # Install
 library(remotes)
