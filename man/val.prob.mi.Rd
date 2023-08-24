@@ -4,7 +4,7 @@
 \alias{val.prob.mi}
 \title{val.prob.mi}
 \usage{
-val.prob.mi(lp.mi, y, g = 5, main = "", dist = FALSE)
+val.prob.mi(lp.mi, y, g = 5, main = "", dist = FALSE, smoothed.curve = TRUE)
 }
 \arguments{
 \item{lp.mi}{Matrix with linear predictor for imputation i in columns (complete case analysis: one column)}
@@ -16,6 +16,8 @@ val.prob.mi(lp.mi, y, g = 5, main = "", dist = FALSE)
 \item{main}{Plot label, default=""}
 
 \item{dist}{distribution, default=TRUE}
+
+\item{smoothed.curve}{indicate if you want to plot the smoothed curve through the quantiles}
 }
 \value{
 The output of the val_prob_mi function is a "list" with the following components.
@@ -126,5 +128,7 @@ y.val <- rbinom(n, 1, 0.5)
 g <- 4
 main <- "Plot label"
 dist <- TRUE
-PredictionTools::val.prob.mi(lp.mi=lp.val, y=y.val, g=g, main=main, dist=dist)
+smoothed.curve <- TRUE
+PredictionTools::val.prob.mi(lp.mi=lp.val, y=y.val, g=g, main=main,
+                              dist=dist, smoothed.curve=smoothed.curve)
 }

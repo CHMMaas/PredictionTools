@@ -17,7 +17,7 @@ mb.c
 Model-based concordance
 }
 \description{
-This function calculates the model-based concordance based on predicted probabilities.
+This function calculates the model-based concordance based on predicted probabilities. Please note this function works for predictions of binary outcomes only.
 }
 \examples{
 library(PredictionTools)

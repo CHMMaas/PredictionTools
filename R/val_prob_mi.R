@@ -31,6 +31,7 @@
 #' @param g Number of risk groups; default=5
 #' @param main Plot label, default=""
 #' @param dist distribution, default=TRUE
+#' @param smoothed.curve indicate if you want to plot the smoothed curve through the quantiles
 #'
 #' @return The output of the val_prob_mi function is a "list" with the following components.
 #'
@@ -139,8 +140,10 @@
 #' g <- 4
 #' main <- "Plot label"
 #' dist <- TRUE
-#' PredictionTools::val.prob.mi(lp.mi=lp.val, y=y.val, g=g, main=main, dist=dist)
-val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE){
+#' smoothed.curve <- TRUE
+#' PredictionTools::val.prob.mi(lp.mi=lp.val, y=y.val, g=g, main=main,
+#'                               dist=dist, smoothed.curve=smoothed.curve)
+val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE, smoothed.curve=TRUE){
   stopifnot("lp.mi must be numeric" = is.numeric(lp.mi))
   stopifnot("y must be numeric" = is.numeric(y))
   stopifnot("g must be numeric" = is.numeric(g))
@@ -285,7 +288,9 @@ val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE){
   }
 
   sm.y.mi<-rowMeans(sm.y)
-  lines((0:100)/100,sm.y.mi,col="dark gray",lwd=2,lty=2)
+  if (smoothed.curve){
+    lines((0:100)/100,sm.y.mi,col="dark gray",lwd=2,lty=2)
+  }
 
   graphics::segments(p.mi,obs.mi.lower,p.mi,obs.mi.upper)
   graphics::points(p.mi,obs.mi,pch=20)
