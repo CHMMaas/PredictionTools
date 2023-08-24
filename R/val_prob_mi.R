@@ -288,7 +288,7 @@ val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE, smoothed.curve=TRUE){
   }
 
   sm.y.mi<-rowMeans(sm.y)
-  if (smoothed.curve){
+  if (smoothed.curve==TRUE){
     lines((0:100)/100,sm.y.mi,col="dark gray",lwd=2,lty=2)
   }
 
