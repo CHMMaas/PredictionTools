@@ -4,7 +4,15 @@
 \alias{val.prob.mi}
 \title{val.prob.mi}
 \usage{
-val.prob.mi(lp.mi, y, g = 5, main = "", dist = FALSE, smoothed.curve = TRUE)
+val.prob.mi(
+  lp.mi,
+  y,
+  g = 5,
+  main = "",
+  dist = FALSE,
+  smoothed.curve = TRUE,
+  show.metrics = rep(TRUE, 8)
+)
 }
 \arguments{
 \item{lp.mi}{Matrix with linear predictor for imputation i in columns (complete case analysis: one column)}
@@ -18,6 +26,8 @@ val.prob.mi(lp.mi, y, g = 5, main = "", dist = FALSE, smoothed.curve = TRUE)
 \item{dist}{distribution, default=TRUE}
 
 \item{smoothed.curve}{indicate if you want to plot the smoothed curve through the quantiles}
+
+\item{show.metrics}{vector of length 8 indicating if plot should show (1) sample size, (2) prevalence, (3) calibration intercept, (4) calibration slope, (5) C-index, (6) model-based C-index, (7) E-average, (8) E-90}
 }
 \value{
 The output of the val_prob_mi function is a "list" with the following components.
@@ -129,6 +139,7 @@ g <- 4
 main <- "Plot label"
 dist <- TRUE
 smoothed.curve <- TRUE
+show.metrics <- rep(TRUE, 8)
 PredictionTools::val.prob.mi(lp.mi=lp.val, y=y.val, g=g, main=main,
                               dist=dist, smoothed.curve=smoothed.curve)
 }

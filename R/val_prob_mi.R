@@ -32,6 +32,7 @@
 #' @param main Plot label, default=""
 #' @param dist distribution, default=TRUE
 #' @param smoothed.curve indicate if you want to plot the smoothed curve through the quantiles
+#' @param show.metrics vector of length 8 indicating if plot should show (1) sample size, (2) prevalence, (3) calibration intercept, (4) calibration slope, (5) C-index, (6) model-based C-index, (7) E-average, (8) E-90
 #'
 #' @return The output of the val_prob_mi function is a "list" with the following components.
 #'
@@ -141,9 +142,11 @@
 #' main <- "Plot label"
 #' dist <- TRUE
 #' smoothed.curve <- TRUE
+#' show.metrics <- rep(TRUE, 8)
 #' PredictionTools::val.prob.mi(lp.mi=lp.val, y=y.val, g=g, main=main,
 #'                               dist=dist, smoothed.curve=smoothed.curve)
-val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE, smoothed.curve=TRUE){
+val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE, smoothed.curve=TRUE,
+                      show.metrics=rep(TRUE, 8)){
   stopifnot("lp.mi must be numeric" = is.numeric(lp.mi))
   stopifnot("y must be numeric" = is.numeric(y))
   stopifnot("g must be numeric" = is.numeric(g))
@@ -304,16 +307,16 @@ val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE, smoothed.curve=TRUE){
   E.90.mi<-mean(E.90)     ## Standard errors unclear
 
   # add statistics to plot
-  graphics::legend(lim[1], lim[2], c(paste("n =",format(n,big.mark=",")),
-                                     paste("p =",format(round(sum(y)/n, 2), nsmall=2)),
-                           paste("a =",format(round(int.mi$est,2),nsmall=2)),
-                           paste("b =",format(round(slope.mi$est,2),nsmall=2)),
-                           paste("c =",format(round(cindex.mi$est,2),nsmall=2)),
-                           paste("mb.c =",format(round(mbc.mi,2),nsmall=2)),
-                           paste0("e.avg = ",format(round(E.avg.mi,3),nsmall=3),
-                                 " (", format(round(E.avg.mi/(sum(y)/n),3),nsmall=3), ")"),
-                           paste0("e.90 = ",format(round(E.90.mi,3),nsmall=3),
-                                 " (", format(round(E.90.mi/(sum(y)/n),3),nsmall=3), ")")),
+  graphics::legend(lim[1], lim[2], c(ifelse(show.metrics[1], paste("n =",format(n,big.mark=",")), ""),
+                           ifelse(show.metrics[2], paste("p =",format(round(sum(y)/n, 2), nsmall=2)), ""),
+                           ifelse(show.metrics[3], paste("a =",format(round(int.mi$est,2),nsmall=2)), ""),
+                           ifelse(show.metrics[4], paste("b =",format(round(slope.mi$est,2),nsmall=2)), ""),
+                           ifelse(show.metrics[5], paste("c =",format(round(cindex.mi$est,2),nsmall=2)), ""),
+                           ifelse(show.metrics[6], paste("mb.c =",format(round(mbc.mi,2),nsmall=2)), ""),
+                           ifelse(show.metrics[7], paste0("e.avg = ",format(round(E.avg.mi,3),nsmall=3),
+                                 " (", format(round(E.avg.mi/(sum(y)/n),3),nsmall=3), ")"), ""),
+                           ifelse(show.metrics[8], paste0("e.90 = ",format(round(E.90.mi,3),nsmall=3),
+                                 " (", format(round(E.90.mi/(sum(y)/n),3),nsmall=3), ")"), "")),
          box.col="white",  bg = "white",cex=1)
 
   return(list(main=main,
