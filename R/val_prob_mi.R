@@ -308,17 +308,20 @@ val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE, smoothed.curve=TRUE,
   E.90.mi<-mean(E.90)     ## Standard errors unclear
 
   # add statistics to plot
-  graphics::legend(lim[1], lim[2], c(ifelse(show.metrics[1], paste("n =",format(n,big.mark=",")), ""),
-                           ifelse(show.metrics[2], paste("p =",format(round(sum(y)/n, 2), nsmall=2)), ""),
-                           ifelse(show.metrics[3], paste("a =",format(round(int.mi$est,2),nsmall=2)), ""),
-                           ifelse(show.metrics[4], paste("b =",format(round(slope.mi$est,2),nsmall=2)), ""),
-                           ifelse(show.metrics[5], paste("c =",format(round(cindex.mi$est,2),nsmall=2)), ""),
-                           ifelse(show.metrics[6], paste("mb.c =",format(round(mbc.mi,2),nsmall=2)), ""),
-                           ifelse(show.metrics[7], paste0("e.avg = ",format(round(E.avg.mi,3),nsmall=3),
-                                 " (", format(round(E.avg.mi/(sum(y)/n),3),nsmall=3), ")"), ""),
-                           ifelse(show.metrics[8], paste0("e.90 = ",format(round(E.90.mi,3),nsmall=3),
-                                 " (", format(round(E.90.mi/(sum(y)/n),3),nsmall=3), ")"), "")),
-         box.col="white",  bg = "white",cex=1)
+  legend.text <- c(paste("n =",format(n,big.mark=",")),
+                   paste("p =",format(round(sum(y)/n, 2), nsmall=2)),
+                   paste("a =",format(round(int.mi$est,2),nsmall=2)),
+                   paste("b =",format(round(slope.mi$est,2),nsmall=2)),
+                   paste("c =",format(round(cindex.mi$est,2),nsmall=2)),
+                   paste("mb.c =",format(round(mbc.mi,2),nsmall=2)),
+                   paste0("e.avg = ",format(round(E.avg.mi,3),nsmall=3),
+                          " (", format(round(E.avg.mi/(sum(y)/n),3),nsmall=3), ")"),
+                   paste0("e.90 = ",format(round(E.90.mi,3),nsmall=3),
+                          " (", format(round(E.90.mi/(sum(y)/n),3),nsmall=3), ")"))
+  if (sum(show.metrics)>0){
+    graphics::legend(lim[1], lim[2], legend.text[show.metrics],
+                     box.col="white",  bg = "white",cex=1)
+  }
 
   return(list(main=main,
               n=n,
