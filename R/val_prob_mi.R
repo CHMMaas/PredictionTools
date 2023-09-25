@@ -32,7 +32,7 @@
 #' @param main Plot label, default=""
 #' @param dist distribution, default=TRUE
 #' @param smoothed.curve indicate if you want to plot the smoothed curve through the quantiles
-#' @param show.metrics vector of length 8 indicating if plot should show (1) sample size, (2) prevalence, (3) calibration intercept, (4) calibration slope, (5) C-index, (6) model-based C-index, (7) E-average, (8) E-90
+#' @param show.metrics TRUE/FALSE vector of length 8 indicating if plot should show (1) sample size, (2) prevalence, (3) calibration intercept, (4) calibration slope, (5) C-index, (6) model-based C-index, (7) E-average, (8) E-90
 #'
 #' @return The output of the val_prob_mi function is a "list" with the following components.
 #'
