@@ -31,8 +31,9 @@
 #' @param g Number of risk groups; default=5
 #' @param main Plot label, default=""
 #' @param dist distribution, default=TRUE
-#' @param smoothed.curve indicate if you want to plot the smoothed curve through the quantiles
-#' @param show.metrics TRUE/FALSE vector of length 8 indicating if plot should show (1) sample size, (2) prevalence, (3) calibration intercept, (4) calibration slope, (5) C-index, (6) model-based C-index, (7) E-average, (8) E-90
+#' @param smoothed.curve indicate if you want to plot the smoothed curve through the quantiles, default=TRUE
+#' @param show.metrics TRUE/FALSE vector of length 8 indicating if plot should show (1) sample size, (2) prevalence, (3) calibration intercept, (4) calibration slope, (5) C-index, (6) model-based C-index, (7) E-average, (8) E-90, default=rep(TRUE, 8)
+#' @param lim limits of y-axis and x-axis, default=c(0, 1)
 #'
 #' @return The output of the val_prob_mi function is a "list" with the following components.
 #'
@@ -143,11 +144,12 @@
 #' dist <- TRUE
 #' smoothed.curve <- TRUE
 #' show.metrics <- rep(TRUE, 8)
+#' lim <- c(0, 1)
 #' PredictionTools::val.prob.mi(lp.mi=lp.val, y=y.val, g=g, main=main,
 #'                               dist=dist, smoothed.curve=smoothed.curve,
-#'                               show.metrics=show.metrics)
+#'                               show.metrics=show.metrics, lim=lim)
 val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE, smoothed.curve=TRUE,
-                      show.metrics=rep(TRUE, 8)){
+                      show.metrics=rep(TRUE, 8), lim=c(0, 1)){
   stopifnot("lp.mi must be numeric" = is.numeric(lp.mi))
   stopifnot("y must be numeric" = is.numeric(y))
   stopifnot("g must be numeric" = is.numeric(g))
@@ -255,7 +257,7 @@ val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE, smoothed.curve=TRUE,
     obs.mi.upper[j]<-stats::plogis(RC$est+qnorm(.975)*RC$se)
   }
 
-  lim<-c(0,1)
+  # lim<-c(0,1)
   graphics::par(mar = c(5,5,2,1))
   graphics::plot(lim,lim,type='l',xlab="Predicted probability",ylab="Observed frequency",main=main,lwd=1,bty='n')
   graphics::lines(lim,lim)
