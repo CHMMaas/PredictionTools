@@ -27,7 +27,7 @@ val.prob.mi(
 
 \item{smoothed.curve}{indicate if you want to plot the smoothed curve through the quantiles}
 
-\item{show.metrics}{vector of length 8 indicating if plot should show (1) sample size, (2) prevalence, (3) calibration intercept, (4) calibration slope, (5) C-index, (6) model-based C-index, (7) E-average, (8) E-90}
+\item{show.metrics}{TRUE/FALSE vector of length 8 indicating if plot should show (1) sample size, (2) prevalence, (3) calibration intercept, (4) calibration slope, (5) C-index, (6) model-based C-index, (7) E-average, (8) E-90}
 }
 \value{
 The output of the val_prob_mi function is a "list" with the following components.
@@ -141,5 +141,6 @@ dist <- TRUE
 smoothed.curve <- TRUE
 show.metrics <- rep(TRUE, 8)
 PredictionTools::val.prob.mi(lp.mi=lp.val, y=y.val, g=g, main=main,
-                              dist=dist, smoothed.curve=smoothed.curve)
+                              dist=dist, smoothed.curve=smoothed.curve,
+                              show.metrics=show.metrics)
 }
