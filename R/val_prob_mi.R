@@ -144,7 +144,8 @@
 #' smoothed.curve <- TRUE
 #' show.metrics <- rep(TRUE, 8)
 #' PredictionTools::val.prob.mi(lp.mi=lp.val, y=y.val, g=g, main=main,
-#'                               dist=dist, smoothed.curve=smoothed.curve)
+#'                               dist=dist, smoothed.curve=smoothed.curve,
+#'                               show.metrics=show.metrics)
 val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE, smoothed.curve=TRUE,
                       show.metrics=rep(TRUE, 8)){
   stopifnot("lp.mi must be numeric" = is.numeric(lp.mi))
