@@ -311,7 +311,7 @@ val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE, smoothed.curve=TRUE,
 
   # add statistics to plot
   legend.text <- c(paste("n =",format(n,big.mark=",")),
-                   paste("events =", format(sum(y), nsmall=2)),
+                   paste("events =", format(sum(y),big.mark=",")),
                    paste("p =",format(round(sum(y)/n, 2), nsmall=2)),
                    paste("a =",format(round(int.mi$est,2),nsmall=2)),
                    paste("b =",format(round(slope.mi$est,2),nsmall=2)),
