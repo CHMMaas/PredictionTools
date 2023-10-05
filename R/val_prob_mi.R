@@ -32,7 +32,7 @@
 #' @param main Plot label, default=""
 #' @param dist distribution, default=TRUE
 #' @param smoothed.curve indicate if you want to plot the smoothed curve through the quantiles, default=TRUE
-#' @param show.metrics TRUE/FALSE vector of length 8 indicating if plot should show (1) sample size, (2) prevalence, (3) calibration intercept, (4) calibration slope, (5) C-index, (6) model-based C-index, (7) E-average, (8) E-90, default=rep(TRUE, 8)
+#' @param show.metrics TRUE/FALSE vector of length 8 indicating if plot should show (1) sample size, (2) number of events, (3) event rate, (4) calibration intercept, (5) calibration slope, (6) C-index, (7) model-based C-index, (8) E-average, (9) E-90, default=rep(TRUE, 8)
 #' @param lim limits of y-axis and x-axis, default=c(0, 1)
 #'
 #' @return The output of the val_prob_mi function is a "list" with the following components.
@@ -143,7 +143,7 @@
 #' main <- "Plot label"
 #' dist <- TRUE
 #' smoothed.curve <- TRUE
-#' show.metrics <- rep(TRUE, 8)
+#' show.metrics <- rep(TRUE, 9)
 #' lim <- c(0, 1)
 #' PredictionTools::val.prob.mi(lp.mi=lp.val, y=y.val, g=g, main=main,
 #'                               dist=dist, smoothed.curve=smoothed.curve,
@@ -311,6 +311,7 @@ val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE, smoothed.curve=TRUE,
 
   # add statistics to plot
   legend.text <- c(paste("n =",format(n,big.mark=",")),
+                   paste("events =", format(sum(y), nsmall=2)),
                    paste("p =",format(round(sum(y)/n, 2), nsmall=2)),
                    paste("a =",format(round(int.mi$est,2),nsmall=2)),
                    paste("b =",format(round(slope.mi$est,2),nsmall=2)),
