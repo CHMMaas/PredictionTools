@@ -155,8 +155,6 @@ val.surv.mi<-function(p, y, g=5, main="", time=NULL,
   slope.se<-rep(0,m.imp.val)
   int<-rep(0,m.imp.val)
   int.se<-rep(0,m.imp.val)
-  cindex<-rep(0,m.imp.val)
-  cindex.se<-rep(0,m.imp.val)
 
   p.groups<-array(rep(0,g*m.imp.val),dim=c(m.imp.val,g),dimnames=list(1:m.imp.val,1:g))
   y.groups<-array(rep(0,2*g*m.imp.val),dim=c(m.imp.val,g,2),dimnames=list(1:m.imp.val,1:g,c("obs","se")))
