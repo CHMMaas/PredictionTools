@@ -267,13 +267,13 @@ val.surv.mi<-function(p, y, g=5, main="", time=NULL,
   cindex.mi<-Rubin.combine(cindex,cindex.se)
 
   graphics::legend(lim[1], lim[2], c(paste("n =",format(n,big.mark=",")),
-                   paste0("intercept = ",format(round(int.mi$est,2),nsmall=2),
+                   paste0("Intercept = ",format(round(int.mi$est,2),nsmall=2),
                          " [", format(round(int.mi$est+stats::qnorm(.025)*int.mi$se, 2), nsmall=2),
                          "; ", format(round(int.mi$est+stats::qnorm(.975)*int.mi$se, 2), nsmall=2), "]"),
-                   paste0("slope = ",format(round(slope.mi$est,2),nsmall=2),
+                   paste0("Slope = ",format(round(slope.mi$est,2),nsmall=2),
                          " [", format(round(slope.mi$est+stats::qnorm(.025)*slope.mi$se, 2), nsmall=2),
                          "; ", format(round(slope.mi$est+stats::qnorm(.975)*slope.mi$se, 2), nsmall=2), "]"),
-                   paste0("c-index = ",format(round(cindex.mi$est-optimism.C,2),nsmall=2),
+                   paste0("C-index = ",format(round(cindex.mi$est-optimism.C,2),nsmall=2),
                          " [", format(round(cindex.mi$est+stats::qnorm(.025)*cindex.mi$se-optimism.C, 2), nsmall=2),
                          "; ", format(round(cindex.mi$est+stats::qnorm(.975)*cindex.mi$se-optimism.C, 2), nsmall=2), "]")),
                    box.col="white",  bg = "white",cex=1)
