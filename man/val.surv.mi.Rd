@@ -13,7 +13,8 @@ val.surv.mi(
   lim = c(0, 1),
   dist = TRUE,
   CI = FALSE,
-  df = 3
+  df = 3,
+  optimism.C = 0
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ val.surv.mi(
 \item{CI}{plot confidence interval, default=FALSE}
 
 \item{df}{degrees of freedom to compute confidence interval, default=3}
+
+\item{optimism.C}{optimism-correction for the C-index, default=0}
 }
 \value{
 The output of the val_surv_mi function is a "list" with the following components.

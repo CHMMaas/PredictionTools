@@ -29,6 +29,7 @@
 #' @param dist distribution, default=TRUE
 #' @param CI plot confidence interval, default=FALSE
 #' @param df degrees of freedom to compute confidence interval, default=3
+#' @param optimism.C optimism-correction for the C-index, default=0
 #'
 #' @return The output of the val_surv_mi function is a "list" with the following components.
 #'
@@ -127,10 +128,13 @@
 #' time <- 30
 #' PredictionTools::val.surv.mi(p=p, y=y, g=g, main=main, time=time)
 val.surv.mi<-function(p, y, g=5, main="", time=NULL,
-                      lim=c(0,1), dist=TRUE, CI=FALSE, df=3){
+                      lim=c(0,1), dist=TRUE, CI=FALSE, df=3,
+                      optimism.C=0){
   stopifnot("p must be numeric" = is.numeric(p))
   stopifnot("y must be numeric" = is.numeric(y))
   stopifnot("g must be numeric" = is.numeric(g))
+  stopifnot("optimism.C must be numeric" = is.numeric(optimism.C))
+
   stopifnot("dist must be a boolean (TRUE or FALSE)" = isTRUE(dist)|isFALSE(dist))
   stopifnot("CI must be a boolean (TRUE or FALSE)" = isTRUE(CI)|isFALSE(CI))
 
@@ -269,9 +273,9 @@ val.surv.mi<-function(p, y, g=5, main="", time=NULL,
                    paste0("b = ",format(round(slope.mi$est,2),nsmall=2),
                          " [", format(round(slope.mi$est+stats::qnorm(.025)*slope.mi$se, 2), nsmall=2),
                          "; ", format(round(slope.mi$est+stats::qnorm(.975)*slope.mi$se, 2), nsmall=2), "]"),
-                   paste0("c = ",format(round(cindex.mi$est,2),nsmall=2),
-                         " [", format(round(cindex.mi$est+stats::qnorm(.025)*cindex.mi$se, 2), nsmall=2),
-                         "; ", format(round(cindex.mi$est+stats::qnorm(.975)*cindex.mi$se, 2), nsmall=2), "]")),
+                   paste0("c = ",format(round(cindex.mi$est-optimism.C,2),nsmall=2),
+                         " [", format(round(cindex.mi$est+stats::qnorm(.025)*cindex.mi$se-optimism.C, 2), nsmall=2),
+                         "; ", format(round(cindex.mi$est+stats::qnorm(.975)*cindex.mi$se-optimism.C, 2), nsmall=2), "]")),
                    box.col="white",  bg = "white",cex=1)
 
   return(list(main=main,
