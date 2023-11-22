@@ -265,9 +265,15 @@ val.surv.mi<-function(p, y, g=5, main="", time=NULL,
   cindex.mi<-Rubin.combine(cindex,cindex.se)
 
   graphics::legend(lim[1], lim[2], c(paste("n =",format(n,big.mark=",")),
-                   paste("a =",format(round(int.mi$est,2),nsmall=2)),
-                   paste("b =",format(round(slope.mi$est,2),nsmall=2)),
-                   paste("c =",format(round(cindex.mi$est,2),nsmall=2))),
+                   paste0("a = ",format(round(int.mi$est,2),nsmall=2),
+                         " [", format(round(int.mi$est+stats::qnorm(.025)*int.mi$se), nsmall=2),
+                         "; ", format(round(int.mi$est+stats::qnorm(.975)*int.mi$se), nsmall=2), "]"),
+                   paste0("b = ",format(round(slope.mi$est,2),nsmall=2),
+                         " [", format(round(slope.mi$est+stats::qnorm(.025)*slope.mi$se), nsmall=2),
+                         "; ", format(round(slope.mi$est+stats::qnorm(.975)*slope.mi$se), nsmall=2), "]"),
+                   paste0("c = ",format(round(cindex.mi$est,2),nsmall=2),
+                         " [", format(round(cindex.mi$est+stats::qnorm(.025)*cindex.mi$se), nsmall=2),
+                         "; ", format(round(cindex.mi$est+stats::qnorm(.975)*cindex.mi$se), nsmall=2), "]")),
                    box.col="white",  bg = "white",cex=1)
 
   return(list(main=main,
