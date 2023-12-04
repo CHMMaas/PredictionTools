@@ -15,6 +15,10 @@ Update 25 September 2023: added features
 1. indicate which metrics to show in calibration plot with show.metrics (TRUE/FALSE vector of length 8);
 2. pre-specify axis limits.
 
+Update 4 December 2023: added features
+1. indicate whether to show confidence interval in calibration plot;
+2. add optimism corrected C-index in calibration plot.
+
 # Load
 library(PredictionTools)
 
