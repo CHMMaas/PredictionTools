@@ -8,12 +8,14 @@ val.surv.mi(
   p,
   y,
   g = 5,
-  main = "",
   time = NULL,
+  main = "",
   lim = c(0, 1),
   dist = TRUE,
   CI = FALSE,
   df = 3,
+  CI.metrics = FALSE,
+  show.metrics = rep(TRUE, 4),
   optimism.C = 0
 )
 }
@@ -24,9 +26,9 @@ val.surv.mi(
 
 \item{g}{Number of risk groups; default=5}
 
-\item{main}{Plot label, default=""}
-
 \item{time}{Time point at which to evaluate the predicted probabilities, default=NULL (not entered), the maximum time point will be taken}
+
+\item{main}{Plot label, default=""}
 
 \item{lim}{limit, default=NULL}
 
@@ -36,7 +38,11 @@ val.surv.mi(
 
 \item{df}{degrees of freedom to compute confidence interval, default=3}
 
-\item{optimism.C}{optimism-correction for the C-index, default=0}
+\item{CI.metrics}{plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, default=FALSE}
+
+\item{show.metrics}{TRUE/FALSE vector of length 4 indicating if plot should show (1) sample size, (2) number of events, (3) event rate, (4) calibration intercept, (5) calibration slope, (6) C-index, (7) model-based C-index, (8) E-average, (9) E-90, default=rep(TRUE, 8)}
+
+\item{optimism.C}{optimism-correction for Harrel's C-index, default=0}
 }
 \value{
 The output of the val_surv_mi function is a "list" with the following components.
@@ -108,7 +114,7 @@ upper bound of 95% confidence interval of slope.
 
 cindex
 
-C-index
+C-index, uncorrected for optimism.
 
 
 cindex.lower
@@ -133,7 +139,9 @@ time_until_event <- runif(n, 0, 5)
 status <- rbinom(n, 1, 0.5)
 y <- Surv(time_until_event, status)
 g <- 4
-main <- "Plot label"
 time <- 30
-PredictionTools::val.surv.mi(p=p, y=y, g=g, main=main, time=time)
+main <- "Plot label"
+show.metrics <- rep(TRUE, 4)
+PredictionTools::val.surv.mi(p=p, y=y, g=g, main=main, time=time,
+                             show.metrics=show.metrics)
 }

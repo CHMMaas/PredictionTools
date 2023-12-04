@@ -30,10 +30,12 @@
 #' @param y Outcome indicator, 1 if event, 0 otherwise
 #' @param g Number of risk groups; default=5
 #' @param main Plot label, default=""
+#' @param lim limits of y-axis and x-axis, default=c(0, 1)
 #' @param dist distribution, default=TRUE
 #' @param smoothed.curve indicate if you want to plot the smoothed curve through the quantiles, default=TRUE
-#' @param show.metrics TRUE/FALSE vector of length 8 indicating if plot should show (1) sample size, (2) number of events, (3) event rate, (4) calibration intercept, (5) calibration slope, (6) C-index, (7) model-based C-index, (8) E-average, (9) E-90, default=rep(TRUE, 8)
-#' @param lim limits of y-axis and x-axis, default=c(0, 1)
+#' @param show.metrics TRUE/FALSE vector of length 9 indicating if plot should show (1) sample size, (2) number of events, (3) event rate, (4) calibration intercept, (5) calibration slope, (6) C-index, (7) model-based C-index, (8) E-average, (9) E-90, default=rep(TRUE, 8)
+#' @param CI.metrics plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, default=FALSE
+#' @param optimism.C optimism-correction for Harrel's C-index, default=0
 #'
 #' @return The output of the val_prob_mi function is a "list" with the following components.
 #'
@@ -104,7 +106,7 @@
 #'
 #' cindex
 #'
-#' C-index
+#' C-index, uncorrected for optimism.
 #'
 #'
 #' cindex.lower
@@ -141,19 +143,18 @@
 #' y.val <- rbinom(n, 1, 0.5)
 #' g <- 4
 #' main <- "Plot label"
-#' dist <- TRUE
-#' smoothed.curve <- TRUE
-#' show.metrics <- rep(TRUE, 9)
 #' lim <- c(0, 1)
+#' show.metrics <- rep(TRUE, 9)
 #' PredictionTools::val.prob.mi(lp.mi=lp.val, y=y.val, g=g, main=main,
-#'                               dist=dist, smoothed.curve=smoothed.curve,
 #'                               show.metrics=show.metrics, lim=lim)
-val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE, smoothed.curve=TRUE,
-                      show.metrics=rep(TRUE, 8), lim=c(0, 1)){
+val.prob.mi<-function(lp.mi, y, g=5,
+                      main="", lim=c(0, 1), dist=FALSE, smoothed.curve=TRUE,
+                      show.metrics=rep(TRUE, 9), CI.metrics=FALSE, optimism.C=0){
   stopifnot("lp.mi must be numeric" = is.numeric(lp.mi))
   stopifnot("y must be numeric" = is.numeric(y))
   stopifnot("g must be numeric" = is.numeric(g))
   stopifnot("dist must be a boolean (TRUE or FALSE)" = isTRUE(dist)|isFALSE(dist))
+  stopifnot("optimism.C must be numeric" = is.numeric(optimism.C))
 
   stopifnot("lp.mi must be a vector or matrix" = is.vector(lp.mi) | is.matrix(lp.mi))
   stopifnot("y must be a vector" = is.vector(y))
@@ -313,9 +314,21 @@ val.prob.mi<-function(lp.mi, y, g=5, main="", dist=FALSE, smoothed.curve=TRUE,
   legend.text <- c(paste("n =",format(n,big.mark=",")),
                    paste("events =", format(sum(y),big.mark=",")),
                    paste("p =",format(round(sum(y)/n, 2), nsmall=2)),
-                   paste("a =",format(round(int.mi$est,2),nsmall=2)),
-                   paste("b =",format(round(slope.mi$est,2),nsmall=2)),
-                   paste("c =",format(round(cindex.mi$est,2),nsmall=2)),
+                   paste0("Intercept = ",format(round(int.mi$est,2),nsmall=2),
+                          ifelse(CI.metrics,
+                                 paste0(" [", format(round(int.mi$est+stats::qnorm(.025)*int.mi$se, 2), nsmall=2),
+                                        "; ", format(round(int.mi$est+stats::qnorm(.975)*int.mi$se, 2), nsmall=2), "]"),
+                                 "")),
+                   paste0("Slope = ",format(round(slope.mi$est,2),nsmall=2),
+                          ifelse(CI.metrics,
+                                 paste0(" [", format(round(slope.mi$est+stats::qnorm(.025)*slope.mi$se, 2), nsmall=2),
+                                        "; ", format(round(slope.mi$est+stats::qnorm(.975)*slope.mi$se, 2), nsmall=2), "]"),
+                                 "")),
+                   paste0("C-index = ",format(round(cindex.mi$est-optimism.C,2),nsmall=2),
+                          ifelse(CI.metrics,
+                                 paste0(" [", format(round(cindex.mi$est+stats::qnorm(.025)*cindex.mi$se-optimism.C, 2), nsmall=2),
+                                        "; ", format(round(cindex.mi$est+stats::qnorm(.975)*cindex.mi$se-optimism.C, 2), nsmall=2), "]"),
+                                 "")),
                    paste("mb.c =",format(round(mbc.mi,2),nsmall=2)),
                    paste0("e.avg = ",format(round(E.avg.mi,3),nsmall=3),
                           " (", format(round(E.avg.mi/(sum(y)/n),3),nsmall=3), ")"),

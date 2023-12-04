@@ -9,10 +9,12 @@ val.prob.mi(
   y,
   g = 5,
   main = "",
+  lim = c(0, 1),
   dist = FALSE,
   smoothed.curve = TRUE,
-  show.metrics = rep(TRUE, 8),
-  lim = c(0, 1)
+  show.metrics = rep(TRUE, 9),
+  CI.metrics = FALSE,
+  optimism.C = 0
 )
 }
 \arguments{
@@ -24,13 +26,17 @@ val.prob.mi(
 
 \item{main}{Plot label, default=""}
 
+\item{lim}{limits of y-axis and x-axis, default=c(0, 1)}
+
 \item{dist}{distribution, default=TRUE}
 
 \item{smoothed.curve}{indicate if you want to plot the smoothed curve through the quantiles, default=TRUE}
 
-\item{show.metrics}{TRUE/FALSE vector of length 8 indicating if plot should show (1) sample size, (2) number of events, (3) event rate, (4) calibration intercept, (5) calibration slope, (6) C-index, (7) model-based C-index, (8) E-average, (9) E-90, default=rep(TRUE, 8)}
+\item{show.metrics}{TRUE/FALSE vector of length 9 indicating if plot should show (1) sample size, (2) number of events, (3) event rate, (4) calibration intercept, (5) calibration slope, (6) C-index, (7) model-based C-index, (8) E-average, (9) E-90, default=rep(TRUE, 8)}
 
-\item{lim}{limits of y-axis and x-axis, default=c(0, 1)}
+\item{CI.metrics}{plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, default=FALSE}
+
+\item{optimism.C}{optimism-correction for Harrel's C-index, default=0}
 }
 \value{
 The output of the val_prob_mi function is a "list" with the following components.
@@ -102,7 +108,7 @@ upper bound of 95% confidence interval of slope.
 
 cindex
 
-C-index
+C-index, uncorrected for optimism.
 
 
 cindex.lower
@@ -140,11 +146,8 @@ lp.val <- matrix(rnorm(n*m, 0, 1), n, m)
 y.val <- rbinom(n, 1, 0.5)
 g <- 4
 main <- "Plot label"
-dist <- TRUE
-smoothed.curve <- TRUE
-show.metrics <- rep(TRUE, 9)
 lim <- c(0, 1)
+show.metrics <- rep(TRUE, 9)
 PredictionTools::val.prob.mi(lp.mi=lp.val, y=y.val, g=g, main=main,
-                              dist=dist, smoothed.curve=smoothed.curve,
                               show.metrics=show.metrics, lim=lim)
 }

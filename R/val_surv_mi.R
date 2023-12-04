@@ -23,13 +23,15 @@
 #' @param p Matrix with predicted probabilities for imputation i in columns (complete case analysis: one column)
 #' @param y Time to event outcome as Surv object (time,status)
 #' @param g Number of risk groups; default=5
-#' @param main Plot label, default=""
 #' @param time Time point at which to evaluate the predicted probabilities, default=NULL (not entered), the maximum time point will be taken
+#' @param main Plot label, default=""
 #' @param lim limit, default=NULL
 #' @param dist distribution, default=TRUE
 #' @param CI plot confidence interval, default=FALSE
 #' @param df degrees of freedom to compute confidence interval, default=3
-#' @param optimism.C optimism-correction for the C-index, default=0
+#' @param CI.metrics plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, default=FALSE
+#' @param show.metrics TRUE/FALSE vector of length 4 indicating if plot should show (1) sample size, (2) number of events, (3) event rate, (4) calibration intercept, (5) calibration slope, (6) C-index, (7) model-based C-index, (8) E-average, (9) E-90, default=rep(TRUE, 8)
+#' @param optimism.C optimism-correction for Harrel's C-index, default=0
 #'
 #' @return The output of the val_surv_mi function is a "list" with the following components.
 #'
@@ -100,7 +102,7 @@
 #'
 #' cindex
 #'
-#' C-index
+#' C-index, uncorrected for optimism.
 #'
 #'
 #' cindex.lower
@@ -124,12 +126,14 @@
 #' status <- rbinom(n, 1, 0.5)
 #' y <- Surv(time_until_event, status)
 #' g <- 4
-#' main <- "Plot label"
 #' time <- 30
-#' PredictionTools::val.surv.mi(p=p, y=y, g=g, main=main, time=time)
-val.surv.mi<-function(p, y, g=5, main="", time=NULL,
-                      lim=c(0,1), dist=TRUE, CI=FALSE, df=3,
-                      optimism.C=0){
+#' main <- "Plot label"
+#' show.metrics <- rep(TRUE, 4)
+#' PredictionTools::val.surv.mi(p=p, y=y, g=g, main=main, time=time,
+#'                              show.metrics=show.metrics)
+val.surv.mi<-function(p, y, g=5, time=NULL,
+                      main="", lim=c(0,1), dist=TRUE, CI=FALSE, df=3,
+                      CI.metrics=FALSE, show.metrics=rep(TRUE, 4), optimism.C=0){
   stopifnot("p must be numeric" = is.numeric(p))
   stopifnot("y must be numeric" = is.numeric(y))
   stopifnot("g must be numeric" = is.numeric(g))
@@ -137,6 +141,7 @@ val.surv.mi<-function(p, y, g=5, main="", time=NULL,
 
   stopifnot("dist must be a boolean (TRUE or FALSE)" = isTRUE(dist)|isFALSE(dist))
   stopifnot("CI must be a boolean (TRUE or FALSE)" = isTRUE(CI)|isFALSE(CI))
+  stopifnot("CI.metrics must be a boolean (TRUE or FALSE)" = isTRUE(CI.metrics)|isFALSE(CI.metrics))
 
   stopifnot("p must be a vector or matrix" = is.vector(p) | is.matrix(p))
   stopifnot("y must be a matrix created by survival::Surv()" = is.matrix(y))
@@ -266,17 +271,26 @@ val.surv.mi<-function(p, y, g=5, main="", time=NULL,
   slope.mi<-Rubin.combine(slope,slope.se)
   cindex.mi<-Rubin.combine(cindex,cindex.se)
 
-  graphics::legend(lim[1], lim[2], c(paste("n =",format(n,big.mark=",")),
+  legend.text <- c(paste("n =",format(n,big.mark=",")),
                    paste0("Intercept = ",format(round(int.mi$est,2),nsmall=2),
-                         " [", format(round(int.mi$est+stats::qnorm(.025)*int.mi$se, 2), nsmall=2),
-                         "; ", format(round(int.mi$est+stats::qnorm(.975)*int.mi$se, 2), nsmall=2), "]"),
+                          ifelse(CI.metrics,
+                                 paste0(" [", format(round(int.mi$est+stats::qnorm(.025)*int.mi$se, 2), nsmall=2),
+                                        "; ", format(round(int.mi$est+stats::qnorm(.975)*int.mi$se, 2), nsmall=2), "]"),
+                                 "")),
                    paste0("Slope = ",format(round(slope.mi$est,2),nsmall=2),
-                         " [", format(round(slope.mi$est+stats::qnorm(.025)*slope.mi$se, 2), nsmall=2),
-                         "; ", format(round(slope.mi$est+stats::qnorm(.975)*slope.mi$se, 2), nsmall=2), "]"),
+                          ifelse(CI.metrics,
+                                 paste0(" [", format(round(slope.mi$est+stats::qnorm(.025)*slope.mi$se, 2), nsmall=2),
+                                        "; ", format(round(slope.mi$est+stats::qnorm(.975)*slope.mi$se, 2), nsmall=2), "]"),
+                                 "")),
                    paste0("C-index = ",format(round(cindex.mi$est-optimism.C,2),nsmall=2),
-                         " [", format(round(cindex.mi$est+stats::qnorm(.025)*cindex.mi$se-optimism.C, 2), nsmall=2),
-                         "; ", format(round(cindex.mi$est+stats::qnorm(.975)*cindex.mi$se-optimism.C, 2), nsmall=2), "]")),
+                          ifelse(CI.metrics,
+                                 paste0(" [", format(round(cindex.mi$est+stats::qnorm(.025)*cindex.mi$se-optimism.C, 2), nsmall=2),
+                                        "; ", format(round(cindex.mi$est+stats::qnorm(.975)*cindex.mi$se-optimism.C, 2), nsmall=2), "]"),
+                                 "")))
+  if (sum(show.metrics)>0){
+    graphics::legend(lim[1], lim[2], legend.text[show.metrics],
                    box.col="white",  bg = "white",cex=1)
+  }
 
   return(list(main=main,
               n=n,quants=quants,
