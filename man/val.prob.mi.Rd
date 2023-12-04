@@ -36,7 +36,7 @@ val.prob.mi(
 
 \item{CI.metrics}{plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, default=FALSE}
 
-\item{optimism.C}{optimism-correction for Harrel's C-index, default=0}
+\item{optimism.C}{optimism-correction for Harrel's C-index in plot, default=0}
 }
 \value{
 The output of the val_prob_mi function is a "list" with the following components.

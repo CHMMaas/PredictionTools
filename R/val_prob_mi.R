@@ -35,7 +35,7 @@
 #' @param smoothed.curve indicate if you want to plot the smoothed curve through the quantiles, default=TRUE
 #' @param show.metrics TRUE/FALSE vector of length 9 indicating if plot should show (1) sample size, (2) number of events, (3) event rate, (4) calibration intercept, (5) calibration slope, (6) C-index, (7) model-based C-index, (8) E-average, (9) E-90, default=rep(TRUE, 8)
 #' @param CI.metrics plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, default=FALSE
-#' @param optimism.C optimism-correction for Harrel's C-index, default=0
+#' @param optimism.C optimism-correction for Harrel's C-index in plot, default=0
 #'
 #' @return The output of the val_prob_mi function is a "list" with the following components.
 #'
