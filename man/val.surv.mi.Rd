@@ -38,7 +38,7 @@ val.surv.mi(
 
 \item{df}{degrees of freedom to compute confidence interval, default=3}
 
-\item{CI.metrics}{plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, default=FALSE}
+\item{CI.metrics}{plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, default=FALSE. Note: Confidence interval for Uno's C-index is not displayed, since it is not implemented in survAUC.}
 
 \item{show.metrics}{TRUE/FALSE vector of length 4 indicating if plot should show (1) sample size, (2) calibration intercept, (3) calibration slope, (4) Harrell's C-index possibly corrected with optimism specified in optimism.C, (5) Uno's C-index, default=rep(TRUE, 5)}
 

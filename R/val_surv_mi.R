@@ -29,7 +29,7 @@
 #' @param dist distribution, default=TRUE
 #' @param CI plot confidence interval, default=FALSE
 #' @param df degrees of freedom to compute confidence interval, default=3
-#' @param CI.metrics plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, default=FALSE
+#' @param CI.metrics plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, default=FALSE. Note: Confidence interval for Uno's C-index is not displayed, since it is not implemented in survAUC.
 #' @param show.metrics TRUE/FALSE vector of length 4 indicating if plot should show (1) sample size, (2) calibration intercept, (3) calibration slope, (4) Harrell's C-index possibly corrected with optimism specified in optimism.C, (5) Uno's C-index, default=rep(TRUE, 5)
 #' @param optimism.C optimism-correction for Harrel's C-index in plot, default=0
 #'
