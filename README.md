@@ -19,6 +19,9 @@ Update 4 December 2023: added features
 1. indicate whether to show confidence interval in calibration plot;
 2. add optimism corrected C-index in calibration plot.
 
+Update 5 december 2023: added features
+1. Uno's C-index
+
 # Load
 library(PredictionTools)
 
