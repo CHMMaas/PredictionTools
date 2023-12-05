@@ -156,6 +156,8 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
   if (!is.null(time)){
     y[y[,1]>time,2]<-0
     y[y[,1]>time,1]<-time
+  } else{
+    time <- max(y[, 1])
   }
 
   lp<-log(-log(1-p))
@@ -278,6 +280,7 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
   int.mi<-Rubin.combine(int,int.se)
   slope.mi<-Rubin.combine(slope,slope.se)
   cindex.mi<-Rubin.combine(cindex,cindex.se)
+  uno.C.mi<-mean(uno.C)
 
   legend.text <- c(paste("n =",format(n,big.mark=",")),
                    paste0("Intercept = ",format(round(int.mi$est,2),nsmall=2),
@@ -295,7 +298,7 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
                                  paste0(" [", format(round(cindex.mi$est+stats::qnorm(.025)*cindex.mi$se-optimism.C, 2), nsmall=2),
                                         "; ", format(round(cindex.mi$est+stats::qnorm(.975)*cindex.mi$se-optimism.C, 2), nsmall=2), "]"),
                                  "")),
-                   paste0("Uno's C-index = ", format(round(uno.C,2),nsmall=2)))
+                   paste0("Uno's C-index = ", format(round(uno.C.mi,2),nsmall=2)))
   if (sum(show.metrics)>0){
     graphics::legend(lim[1], lim[2], legend.text[show.metrics],
                    box.col="white",  bg = "white",cex=1)
@@ -316,5 +319,5 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
               cindex=cindex.mi$est,
               cindex.lower=cindex.mi$est+stats::qnorm(.025)*cindex.mi$se,
               cindex.upper=cindex.mi$est+stats::qnorm(.975)*cindex.mi$se,
-              uno.C=uno.C))
+              uno.C=uno.C.mi))
 }
