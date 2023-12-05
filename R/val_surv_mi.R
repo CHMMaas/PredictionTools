@@ -30,7 +30,7 @@
 #' @param CI plot confidence interval, default=FALSE
 #' @param df degrees of freedom to compute confidence interval, default=3
 #' @param CI.metrics plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, default=FALSE
-#' @param show.metrics TRUE/FALSE vector of length 4 indicating if plot should show (1) sample size, (2) calibration intercept, (3) calibration slope, (4) C-index, default=rep(TRUE, 4)
+#' @param show.metrics TRUE/FALSE vector of length 4 indicating if plot should show (1) sample size, (2) calibration intercept, (3) calibration slope, (4) Harrell's C-index possibly corrected with optimism specified in optimism.C, (5) Uno's C-index, default=rep(TRUE, 5)
 #' @param optimism.C optimism-correction for Harrel's C-index in plot, default=0
 #'
 #' @return The output of the val_surv_mi function is a "list" with the following components.
@@ -113,6 +113,11 @@
 #'
 #' upper bound of 95% confidence interval of C-index.
 #'
+#'
+#' uno.C
+#'
+#' Uno's C-index for time-to-event outcomes, uncorrected for optimism
+#'
 #' @export
 #'
 #' @examples
@@ -128,7 +133,7 @@
 #' g <- 4
 #' time <- 30
 #' main <- "Plot label"
-#' show.metrics <- rep(TRUE, 4)
+#' show.metrics <- rep(TRUE, 5)
 #' PredictionTools::val.surv.mi(p=p, y=y, g=g, main=main, time=time,
 #'                              show.metrics=show.metrics)
 val.surv.mi<-function(p, y, g=5, time=NULL,
@@ -160,6 +165,7 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
 
   cindex<-rep(0,m.imp.val)
   cindex.se<-rep(0,m.imp.val)
+  uno.C<-rep(0, m.imp.val)
   slope<-rep(0,m.imp.val)
   slope.se<-rep(0,m.imp.val)
   int<-rep(0,m.imp.val)
@@ -185,6 +191,8 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
     rc<-Hmisc::rcorr.cens(-lp.val,y)
     cindex[i]<-rc["C Index"]
     cindex.se[i]<-rc["S.D."]/2
+
+    uno.C[i]<-as.numeric(survAUC::UnoC(Surv.rsp=y, Surv.rsp.new=y, lpnew=lp.val))
 
     slope[i]<-f.val$coefficients[[1]]
     slope.se[i]<-sqrt(stats::vcov(f.val)[[1,1]])
@@ -282,11 +290,12 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
                                  paste0(" [", format(round(slope.mi$est+stats::qnorm(.025)*slope.mi$se, 2), nsmall=2),
                                         "; ", format(round(slope.mi$est+stats::qnorm(.975)*slope.mi$se, 2), nsmall=2), "]"),
                                  "")),
-                   paste0("C-index = ",format(round(cindex.mi$est-optimism.C,2),nsmall=2),
+                   paste0("Harrell's C-index = ",format(round(cindex.mi$est-optimism.C,2),nsmall=2),
                           ifelse(CI.metrics,
                                  paste0(" [", format(round(cindex.mi$est+stats::qnorm(.025)*cindex.mi$se-optimism.C, 2), nsmall=2),
                                         "; ", format(round(cindex.mi$est+stats::qnorm(.975)*cindex.mi$se-optimism.C, 2), nsmall=2), "]"),
-                                 "")))
+                                 "")),
+                   paste0("Uno's C-index = ", format(round(uno.C,2),nsmall=2)))
   if (sum(show.metrics)>0){
     graphics::legend(lim[1], lim[2], legend.text[show.metrics],
                    box.col="white",  bg = "white",cex=1)
@@ -306,5 +315,6 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
               slope.upper=slope.mi$est+stats::qnorm(.975)*slope.mi$se,
               cindex=cindex.mi$est,
               cindex.lower=cindex.mi$est+stats::qnorm(.025)*cindex.mi$se,
-              cindex.upper=cindex.mi$est+stats::qnorm(.975)*cindex.mi$se))
+              cindex.upper=cindex.mi$est+stats::qnorm(.975)*cindex.mi$se,
+              uno.C=uno.C))
 }

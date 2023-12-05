@@ -40,7 +40,7 @@ val.surv.mi(
 
 \item{CI.metrics}{plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, default=FALSE}
 
-\item{show.metrics}{TRUE/FALSE vector of length 4 indicating if plot should show (1) sample size, (2) calibration intercept, (3) calibration slope, (4) C-index, default=rep(TRUE, 4)}
+\item{show.metrics}{TRUE/FALSE vector of length 4 indicating if plot should show (1) sample size, (2) calibration intercept, (3) calibration slope, (4) Harrell's C-index possibly corrected with optimism specified in optimism.C, (5) Uno's C-index, default=rep(TRUE, 5)}
 
 \item{optimism.C}{optimism-correction for Harrel's C-index in plot, default=0}
 }
@@ -124,6 +124,11 @@ lower bound of 95% confidence interval of C-index.
 cindex.upper
 
 upper bound of 95% confidence interval of C-index.
+
+
+uno.C
+
+Uno's C-index for time-to-event outcomes, uncorrected for optimism
 }
 \description{
 This function calculates intercept, slope, and C-index for survival risk predictions of multiple imputed data set(s).
@@ -141,7 +146,7 @@ y <- Surv(time_until_event, status)
 g <- 4
 time <- 30
 main <- "Plot label"
-show.metrics <- rep(TRUE, 4)
+show.metrics <- rep(TRUE, 5)
 PredictionTools::val.surv.mi(p=p, y=y, g=g, main=main, time=time,
                              show.metrics=show.metrics)
 }
