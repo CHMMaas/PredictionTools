@@ -311,9 +311,9 @@ val.prob.mi<-function(lp.mi, y, g=5,
   E.90.mi<-mean(E.90)     ## Standard errors unclear
 
   # add statistics to plot
-  legend.text <- c(paste("n =",format(n,big.mark=",")),
-                   paste("events =", format(sum(y),big.mark=",")),
-                   paste("p =",format(round(sum(y)/n, 2), nsmall=2)),
+  legend.text <- c(paste("N =",format(n,big.mark=",")),
+                   paste("Events =", format(sum(y),big.mark=",")),
+                   paste("Event rate =",format(round(sum(y)/n, 2), nsmall=2)),
                    paste0("Intercept = ",format(round(int.mi$est,2),nsmall=2),
                           ifelse(CI.metrics,
                                  paste0(" [", format(round(int.mi$est+stats::qnorm(.025)*int.mi$se, 2), nsmall=2),

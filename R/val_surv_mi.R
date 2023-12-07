@@ -285,7 +285,7 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
   cindex.mi<-Rubin.combine(cindex,cindex.se)
   uno.C.mi<-mean(uno.C)
 
-  legend.text <- c(paste("n =",format(n,big.mark=",")),
+  legend.text <- c(paste("N =",format(n,big.mark=",")),
                    paste0("Intercept = ",format(round(int.mi$est,2),nsmall=2),
                           ifelse(CI.metrics,
                                  paste0(" [", format(round(int.mi$est+stats::qnorm(.025)*int.mi$se, 2), nsmall=2),
