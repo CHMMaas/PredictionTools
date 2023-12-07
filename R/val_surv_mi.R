@@ -194,7 +194,10 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
     cindex[i]<-rc["C Index"]
     cindex.se[i]<-rc["S.D."]/2
 
-    uno.C[i]<-as.numeric(survAUC::UnoC(Surv.rsp=y, Surv.rsp.new=y, lpnew=lp.val))
+    uno.C[i] <- survC1::Est.Cval(mydata=cbind(y[, 1],
+                                     y[, 2],
+                                     lp.val),
+                        tau=time, nofit=TRUE)$Dhat
 
     slope[i]<-f.val$coefficients[[1]]
     slope.se[i]<-sqrt(stats::vcov(f.val)[[1,1]])

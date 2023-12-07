@@ -15,4 +15,4 @@ Imports:
     rms,
     survival,
     mice,
-    survAUC
+    survC1
