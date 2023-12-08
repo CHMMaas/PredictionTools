@@ -28,7 +28,7 @@
 #' horizon <- 5
 #' S.5 <- S
 #' S.5[S[,1]>horizon, 1] <- horizon # if time is more than horizon, set to horizon
-#' S.5[S[,1]>horizon, 2] <- 0       # if time si more than horizon, censor
+#' S.5[S[,1]>horizon, 2] <- 0       # if time is more than horizon, censor
 #'
 #' # fit model
 #' model <- cph(S.5 ~ sex + age + bili, data=pbc, x=TRUE, y=TRUE, se.fit=TRUE)
