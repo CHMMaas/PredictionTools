@@ -22,6 +22,9 @@ Update 4 December 2023: added features
 Update 5 december 2023: added features
 1. Uno's C-index for val.surv.mi()
 
+Update 8 december 2023: added features
+1. Fun.event() function added that translates linear predictor and baseline hazard for a specific time point into predicted probabilities
+
 # Load
 library(PredictionTools)
 
