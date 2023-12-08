@@ -136,17 +136,41 @@ This function calculates intercept, slope, and C-index for survival risk predict
 \examples{
 library(PredictionTools)
 library(survival)
+library(rms)
 set.seed(1)
-n <- 100
-m <- 5 # number of imputations
-p <- matrix(runif(n*m, 0, 1), n, m)
-time_until_event <- runif(n, 0, 5)
-status <- rbinom(n, 1, 0.5)
-y <- Surv(time_until_event, status)
+
+# load data
+data(pbc, package="survival")
+
+# set survival time
+S <- survival::Surv(time=pbc$time/365, event=as.numeric(pbc$status!=0))
+
+# limit survival to time horizon
+horizon <- 5
+S.5 <- S
+S.5[S[,1]>horizon, 1] <- horizon # if time is more than horizon, set to horizon
+S.5[S[,1]>horizon, 2] <- 0       # if time si more than horizon, censor
+
+# fit model
+model <- cph(S.5 ~ sex + age + bili, data=pbc, x=TRUE, y=TRUE, se.fit=TRUE)
+
+# obtain linear predictor
+lp <- predict(model, type="lp")
+
+# obtain baseline hazard
+f.basehaz <- survival::basehaz(model)
+
+# obtain baseline hazard at horizon
+h0 <- f.basehaz$hazard[f.basehaz$time==max(f.basehaz$time[f.basehaz$time<=horizon])]
+
+# make predictions at time horizon
+p <- PredictionTools::fun.event(lp=lp, h0=h0)
+
+# internally validate predictions
 g <- 4
-time <- 30
 main <- "Plot label"
 show.metrics <- rep(TRUE, 5)
-PredictionTools::val.surv.mi(p=p, y=y, g=g, main=main, time=time,
+PredictionTools::val.surv.mi(p=as.matrix(p), y=S.5,
+                             g=g, main=main, time=horizon,
                              show.metrics=show.metrics)
 }
