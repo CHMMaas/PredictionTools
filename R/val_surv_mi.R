@@ -124,10 +124,16 @@
 #' library(PredictionTools)
 #' library(survival)
 #' library(rms)
+#' library(mice)
 #' set.seed(1)
 #'
 #' # load data
 #' data(pbc, package="survival")
+#'
+#' # Multiple imputation
+#' m <- 5
+#' candidate.predictors <- c("sex", "age", "bili", "ascites", "hepato")
+#' imp <- mice::mice(pbc[, candidate.predictors], m=m, print=FALSE)
 #'
 #' # set survival time
 #' S <- survival::Surv(time=pbc$time/365, event=as.numeric(pbc$status!=0))
@@ -138,21 +144,28 @@
 #' S.5[S[,1]>horizon, 1] <- horizon # if time is more than horizon, set to horizon
 #' S.5[S[,1]>horizon, 2] <- 0       # if time is more than horizon, censor
 #'
-#' # fit model
-#' model <- cph(S.5 ~ sex + age + bili, data=pbc, x=TRUE, y=TRUE, se.fit=TRUE)
+#' p <- c()
+#' for (i in 1:m){
+#'  # fit model
+#'   model.i <- cph(S.5 ~ sex + age + bili + ascites + hepato,
+#'                  data=mice::complete(imp, i),
+#'                  x=TRUE, y=TRUE, se.fit=TRUE)
 #'
-#' # obtain linear predictor
-#' lp <- predict(model, type="lp")
+#'   # obtain linear predictor
+#'   lp.i <- predict(model.i, type="lp")
 #'
-#' # obtain baseline hazard
-#' f.basehaz <- survival::basehaz(model)
+#'   # obtain baseline hazard
+#'   f.basehaz.i <- survival::basehaz(model.i)
 #'
-#' # obtain baseline hazard at horizon
-#' h0 <- f.basehaz$hazard[f.basehaz$time==max(f.basehaz$time[f.basehaz$time<=horizon])]
+#'   # obtain baseline hazard at horizon
+#'   h0.i <- f.basehaz.i$hazard[f.basehaz.i$time==max(f.basehaz.i$time[f.basehaz.i$time<=horizon])]
 #'
-#' # make predictions at time horizon
-#' p <- PredictionTools::fun.event(lp=lp, h0=h0)
+#'   # make predictions at time horizon
+#'   p.i <- PredictionTools::fun.event(lp=lp.i, h0=h0.i)
 #'
+#'   # add to p
+#'   p <- cbind(p, p.i)
+#' }
 #' # internally validate predictions
 #' g <- 4
 #' main <- "Plot label"
