@@ -26,7 +26,7 @@ val.surv.mi(
 
 \item{g}{Number of risk groups; default=5}
 
-\item{time}{Time point at which to evaluate the predicted probabilities, default=NULL (not entered), the maximum time point will be taken}
+\item{time}{Time point at which to evaluate the predicted probabilities, default=NULL (not entered), the maximum time point will be taken. Please note that tdAUC doesn't compute at maximum follow-up time, you can use show.metrics to omit these results from the plot.}
 
 \item{main}{Plot label, default=""}
 
@@ -40,7 +40,7 @@ val.surv.mi(
 
 \item{CI.metrics}{plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, default=FALSE. Note: Confidence interval for Uno's C-index is not displayed, since it is not implemented in survAUC.}
 
-\item{show.metrics}{TRUE/FALSE vector of length 4 indicating if plot should show (1) sample size, (2) calibration intercept, (3) calibration slope, (4) Harrell's C-index possibly corrected with optimism specified in optimism.C, (5) Uno's C-index, default=rep(TRUE, 5)}
+\item{show.metrics}{TRUE/FALSE vector of length 4 indicating if plot should show (1) sample size, (2) calibration intercept, (3) calibration slope, (4) Harrell's C-index possibly corrected with optimism specified in optimism.C, (5) Uno's C-index, (6) time-dependent AUC as defined by Blanche et al., default=rep(TRUE, 5)}
 
 \item{optimism.C}{optimism-correction for Harrel's C-index in plot, default=0}
 }
@@ -181,7 +181,7 @@ for (i in 1:m){
 }
 # internally validate predictions
 g <- 4
-main <- "Plot label"
+main <- paste("Calibration plot for predictions at time",  horizon)
 show.metrics <- rep(TRUE, 5)
 PredictionTools::val.surv.mi(p=as.matrix(p), y=S.5,
                              g=g, main=main, time=horizon,

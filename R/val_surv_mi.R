@@ -23,14 +23,14 @@
 #' @param p Matrix with predicted probabilities for imputation i in columns (complete case analysis: one column)
 #' @param y Time to event outcome as Surv object (time,status)
 #' @param g Number of risk groups; default=5
-#' @param time Time point at which to evaluate the predicted probabilities, default=NULL (not entered), the maximum time point will be taken
+#' @param time Time point at which to evaluate the predicted probabilities, default=NULL (not entered), the maximum time point will be taken. Please note that tdAUC doesn't compute at maximum follow-up time, you can use show.metrics to omit these results from the plot.
 #' @param main Plot label, default=""
 #' @param lim limit, default=NULL
 #' @param dist distribution, default=TRUE
 #' @param CI plot confidence interval, default=FALSE
 #' @param df degrees of freedom to compute confidence interval, default=3
 #' @param CI.metrics plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, default=FALSE. Note: Confidence interval for Uno's C-index is not displayed, since it is not implemented in survAUC.
-#' @param show.metrics TRUE/FALSE vector of length 4 indicating if plot should show (1) sample size, (2) calibration intercept, (3) calibration slope, (4) Harrell's C-index possibly corrected with optimism specified in optimism.C, (5) Uno's C-index, default=rep(TRUE, 5)
+#' @param show.metrics TRUE/FALSE vector of length 4 indicating if plot should show (1) sample size, (2) calibration intercept, (3) calibration slope, (4) Harrell's C-index possibly corrected with optimism specified in optimism.C, (5) Uno's C-index, (6) time-dependent AUC as defined by Blanche et al., default=rep(TRUE, 5)
 #' @param optimism.C optimism-correction for Harrel's C-index in plot, default=0
 #'
 #' @return The output of the val_surv_mi function is a "list" with the following components.
@@ -168,7 +168,7 @@
 #' }
 #' # internally validate predictions
 #' g <- 4
-#' main <- "Plot label"
+#' main <- paste("Calibration plot for predictions at time",  horizon)
 #' show.metrics <- rep(TRUE, 5)
 #' PredictionTools::val.surv.mi(p=as.matrix(p), y=S.5,
 #'                              g=g, main=main, time=horizon,
@@ -190,6 +190,7 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
 
   stopifnot("p and y must be the same length" = nrow(p)==nrow(y) | length(p)==nrow(y))
 
+  y.orig <- y
   if (!is.null(time)){
     y[y[,1]>time,2]<-0
     y[y[,1]>time,1]<-time
@@ -205,6 +206,7 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
   cindex<-rep(0,m.imp.val)
   cindex.se<-rep(0,m.imp.val)
   uno.C<-rep(0, m.imp.val)
+  tdAUC<-rep(0, m.imp.val)
   slope<-rep(0,m.imp.val)
   slope.se<-rep(0,m.imp.val)
   int<-rep(0,m.imp.val)
@@ -235,6 +237,12 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
                                      y[, 2],
                                      lp.val),
                         tau=time, nofit=TRUE)$Dhat
+
+    tdAUC[i] <- timeROC::timeROC(T=y.orig[, 1],
+                                 delta=y.orig[, 2],
+                                 marker=lp.val,
+                                 times=time,
+                                 cause=1)$AUC[2]
 
     slope[i]<-f.val$coefficients[[1]]
     slope.se[i]<-sqrt(stats::vcov(f.val)[[1,1]])
@@ -321,6 +329,7 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
   slope.mi<-Rubin.combine(slope,slope.se)
   cindex.mi<-Rubin.combine(cindex,cindex.se)
   uno.C.mi<-mean(uno.C)
+  tdAUC.mi<-mean(tdAUC)
 
   legend.text <- c(paste("N =",format(n,big.mark=",")),
                    paste0("Intercept = ",format(round(int.mi$est,2),nsmall=2),
@@ -338,7 +347,8 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
                                  paste0(" [", format(round(cindex.mi$est+stats::qnorm(.025)*cindex.mi$se-optimism.C, 2), nsmall=2),
                                         "; ", format(round(cindex.mi$est+stats::qnorm(.975)*cindex.mi$se-optimism.C, 2), nsmall=2), "]"),
                                  "")),
-                   paste0("Uno's C-index = ", format(round(uno.C.mi,2),nsmall=2)))
+                   paste0("Uno's C-index = ", format(round(uno.C.mi,2),nsmall=2)),
+                   paste0("tdAUC = ", format(round(tdAUC.mi,2),nsmall=2)))
   if (sum(show.metrics)>0){
     graphics::legend(lim[1], lim[2], legend.text[show.metrics],
                    box.col="white",  bg = "white",cex=1)
