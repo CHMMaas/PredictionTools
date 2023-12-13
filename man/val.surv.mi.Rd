@@ -22,7 +22,7 @@ val.surv.mi(
 \arguments{
 \item{p}{Matrix with predicted probabilities for imputation i in columns (complete case analysis: one column)}
 
-\item{y}{Time to event outcome as Surv object (time,status)}
+\item{y}{Time to event outcome as Surv object (time,status), unrestricted followup}
 
 \item{g}{Number of risk groups; default=5}
 
@@ -183,7 +183,7 @@ for (i in 1:m){
 g <- 4
 main <- paste("Calibration plot for predictions at time",  horizon)
 show.metrics <- rep(TRUE, 5)
-PredictionTools::val.surv.mi(p=as.matrix(p), y=S.5,
+PredictionTools::val.surv.mi(p=as.matrix(p), y=S,
                              g=g, main=main, time=horizon,
                              show.metrics=show.metrics)
 }

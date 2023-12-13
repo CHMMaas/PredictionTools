@@ -21,7 +21,7 @@
 #' @importFrom utils tail
 #'
 #' @param p Matrix with predicted probabilities for imputation i in columns (complete case analysis: one column)
-#' @param y Time to event outcome as Surv object (time,status)
+#' @param y Time to event outcome as Surv object (time,status), unrestricted followup
 #' @param g Number of risk groups; default=5
 #' @param time Time point at which to evaluate the predicted probabilities, default=NULL (not entered), the maximum time point will be taken. Please note that tdAUC doesn't compute at maximum follow-up time, you can use show.metrics to omit these results from the plot.
 #' @param main Plot label, default=""
@@ -170,7 +170,7 @@
 #' g <- 4
 #' main <- paste("Calibration plot for predictions at time",  horizon)
 #' show.metrics <- rep(TRUE, 5)
-#' PredictionTools::val.surv.mi(p=as.matrix(p), y=S.5,
+#' PredictionTools::val.surv.mi(p=as.matrix(p), y=S,
 #'                              g=g, main=main, time=horizon,
 #'                              show.metrics=show.metrics)
 val.surv.mi<-function(p, y, g=5, time=NULL,
@@ -369,5 +369,6 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
               cindex=cindex.mi$est,
               cindex.lower=cindex.mi$est+stats::qnorm(.025)*cindex.mi$se,
               cindex.upper=cindex.mi$est+stats::qnorm(.975)*cindex.mi$se,
-              uno.C=uno.C.mi))
+              uno.C=uno.C.mi,
+              tdAUC=tdAUC.mi))
 }
