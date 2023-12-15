@@ -455,6 +455,6 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
               unoC.upper=unoC.mi+stats::qnorm(.975)*unoC.se,
               tdAUC=tdAUC.mi,
               tdAUC.se=tdAUC.se,
-              unoC.lower=tdAUC.mi+stats::qnorm(.025)*tdAUC.se,
-              unoC.upper=tdAUC.mi+stats::qnorm(.975)*tdAUC.se))
+              tdAUC.lower=tdAUC.mi+stats::qnorm(.025)*tdAUC.se,
+              tdAUC.upper=tdAUC.mi+stats::qnorm(.975)*tdAUC.se))
 }
