@@ -16,6 +16,7 @@ val.surv.mi(
   df = 3,
   CI.metrics = FALSE,
   show.metrics = rep(TRUE, 4),
+  n.iter = 10,
   optimism.C = 0
 )
 }
@@ -38,9 +39,11 @@ val.surv.mi(
 
 \item{df}{degrees of freedom to compute confidence interval, default=3}
 
-\item{CI.metrics}{plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, default=FALSE. Note: Confidence interval for Uno's C-index is not displayed, since it is not implemented in survAUC.}
+\item{CI.metrics}{plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, Uno's C-index, and time-dependent C-index, default=FALSE. Note: this might be time consuming depending on the number of observations and number of iterations (n.iter).}
 
 \item{show.metrics}{TRUE/FALSE vector of length 4 indicating if plot should show (1) sample size, (2) calibration intercept, (3) calibration slope, (4) Harrell's C-index possibly corrected with optimism specified in optimism.C, (5) Uno's C-index, (6) time-dependent AUC as defined by Blanche et al., default=rep(TRUE, 5)}
+
+\item{n.iter}{n.iter number of iterations to calculate 95\% confidence interval of Uno's C-index}
 
 \item{optimism.C}{optimism-correction for Harrel's C-index in plot, default=0}
 }
@@ -74,12 +77,12 @@ observed survival for each imputed data set.
 
 obs.mi.lower
 
-lower bound of 95% confidence interval of observed survival.
+lower bound of 95\% confidence interval of observed survival.
 
 
 obs.mi.upper
 
-upper bound of 95% confidence interval of observed survival.
+upper bound of 95\% confidence interval of observed survival.
 
 
 int
@@ -89,12 +92,12 @@ intercept
 
 int.lower
 
-lower bound of 95% confidence interval of intercept.
+lower bound of 95\% confidence interval of intercept.
 
 
 int.upper
 
-upper bound of 95% confidence interval of intercept.
+upper bound of 95\% confidence interval of intercept.
 
 
 slope
@@ -104,31 +107,71 @@ slope estimate
 
 slope.lower
 
-lower bound of 95% confidence interval of slope.
+lower bound of 95\% confidence interval of slope.
 
 
 slope.upper
 
-upper bound of 95% confidence interval of slope.
+upper bound of 95\% confidence interval of slope.
 
 
 cindex
 
-C-index, uncorrected for optimism.
+Harrell's C-index, uncorrected for optimism.
+
+
+cindex.se
+
+standard error of Harrell's C-index
 
 
 cindex.lower
 
-lower bound of 95% confidence interval of C-index.
+lower bound of 95\% confidence interval of Harrell's C-index
 
 cindex.upper
 
-upper bound of 95% confidence interval of C-index.
+upper bound of 95\% confidence interval of Harrell's C-index.
 
 
-uno.C
+unoC
 
 Uno's C-index for time-to-event outcomes, uncorrected for optimism
+
+
+unoC.se
+
+standard error of Uno's C-index, based one a single imputation
+
+
+unoC.lower
+
+lower bound of 95\% confidence interval of Uno's C-index
+
+
+unoC.lower
+
+lower bound of 95\% confidence interval of Uno's C-index
+
+
+tdAUC
+
+time-dependent AUC, calculated using inverse propensity score weighting by the timeROC package, uncorrected for optimism
+
+
+tdAUC.se
+
+standard error of time-dependent AUC, based one a single imputation
+
+
+tdAUC.lower
+
+lower bound of 95\% confidence interval of time-dependent AUC
+
+
+tdAUC.upper
+
+upper bound of 95\% confidence interval of time-dependent AUC
 }
 \description{
 This function calculates intercept, slope, and C-index for survival risk predictions of multiple imputed data set(s).

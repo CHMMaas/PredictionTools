@@ -19,6 +19,7 @@
 #' @importFrom stats qnorm
 #' @importFrom stats vcov
 #' @importFrom utils tail
+#' @importFrom timeROC timeROC
 #'
 #' @param p Matrix with predicted probabilities for imputation i in columns (complete case analysis: one column)
 #' @param y Time to event outcome as Surv object (time,status), unrestricted followup
@@ -29,7 +30,8 @@
 #' @param dist distribution, default=TRUE
 #' @param CI plot confidence interval, default=FALSE
 #' @param df degrees of freedom to compute confidence interval, default=3
-#' @param CI.metrics plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, default=FALSE. Note: Confidence interval for Uno's C-index is not displayed, since it is not implemented in survAUC.
+#' @param CI.metrics plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, Uno's C-index, and time-dependent C-index, default=FALSE. Note: this might be time consuming depending on the number of observations and number of iterations (n.iter).
+#' @param n.iter n.iter number of iterations to calculate 95\% confidence interval of Uno's C-index
 #' @param show.metrics TRUE/FALSE vector of length 4 indicating if plot should show (1) sample size, (2) calibration intercept, (3) calibration slope, (4) Harrell's C-index possibly corrected with optimism specified in optimism.C, (5) Uno's C-index, (6) time-dependent AUC as defined by Blanche et al., default=rep(TRUE, 5)
 #' @param optimism.C optimism-correction for Harrel's C-index in plot, default=0
 #'
@@ -62,12 +64,12 @@
 #'
 #' obs.mi.lower
 #'
-#' lower bound of 95% confidence interval of observed survival.
+#' lower bound of 95\% confidence interval of observed survival.
 #'
 #'
 #' obs.mi.upper
 #'
-#' upper bound of 95% confidence interval of observed survival.
+#' upper bound of 95\% confidence interval of observed survival.
 #'
 #'
 #' int
@@ -77,12 +79,12 @@
 #'
 #' int.lower
 #'
-#' lower bound of 95% confidence interval of intercept.
+#' lower bound of 95\% confidence interval of intercept.
 #'
 #'
 #' int.upper
 #'
-#' upper bound of 95% confidence interval of intercept.
+#' upper bound of 95\% confidence interval of intercept.
 #'
 #'
 #' slope
@@ -92,31 +94,72 @@
 #'
 #' slope.lower
 #'
-#' lower bound of 95% confidence interval of slope.
+#' lower bound of 95\% confidence interval of slope.
 #'
 #'
 #' slope.upper
 #'
-#' upper bound of 95% confidence interval of slope.
+#' upper bound of 95\% confidence interval of slope.
 #'
 #'
 #' cindex
 #'
-#' C-index, uncorrected for optimism.
+#' Harrell's C-index, uncorrected for optimism.
+#'
+#'
+#' cindex.se
+#'
+#' standard error of Harrell's C-index
 #'
 #'
 #' cindex.lower
 #'
-#' lower bound of 95% confidence interval of C-index.
+#' lower bound of 95\% confidence interval of Harrell's C-index
 #'
 #' cindex.upper
 #'
-#' upper bound of 95% confidence interval of C-index.
+#' upper bound of 95\% confidence interval of Harrell's C-index.
 #'
 #'
-#' uno.C
+#' unoC
 #'
 #' Uno's C-index for time-to-event outcomes, uncorrected for optimism
+#'
+#'
+#' unoC.se
+#'
+#' standard error of Uno's C-index, based one a single imputation
+#'
+#'
+#' unoC.lower
+#'
+#' lower bound of 95\% confidence interval of Uno's C-index
+#'
+#'
+#' unoC.lower
+#'
+#' lower bound of 95\% confidence interval of Uno's C-index
+#'
+#'
+#' tdAUC
+#'
+#' time-dependent AUC, calculated using inverse propensity score weighting by the timeROC package, uncorrected for optimism
+#'
+#'
+#' tdAUC.se
+#'
+#' standard error of time-dependent AUC, based one a single imputation
+#'
+#'
+#' tdAUC.lower
+#'
+#' lower bound of 95\% confidence interval of time-dependent AUC
+#'
+#'
+#' tdAUC.upper
+#'
+#' upper bound of 95\% confidence interval of time-dependent AUC
+#'
 #'
 #' @export
 #'
@@ -175,7 +218,8 @@
 #'                              show.metrics=show.metrics)
 val.surv.mi<-function(p, y, g=5, time=NULL,
                       main="", lim=c(0,1), dist=TRUE, CI=FALSE, df=3,
-                      CI.metrics=FALSE, show.metrics=rep(TRUE, 4), optimism.C=0){
+                      CI.metrics=FALSE, show.metrics=rep(TRUE, 4), n.iter=10,
+                      optimism.C=0){
   stopifnot("p must be numeric" = is.numeric(p))
   stopifnot("y must be numeric" = is.numeric(y))
   stopifnot("g must be numeric" = is.numeric(g))
@@ -205,8 +249,10 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
 
   cindex<-rep(0,m.imp.val)
   cindex.se<-rep(0,m.imp.val)
-  uno.C<-rep(0, m.imp.val)
+  unoC<-rep(0, m.imp.val)
+  unoC.se<-0
   tdAUC<-rep(0, m.imp.val)
+  tdAUC.se<-0
   slope<-rep(0,m.imp.val)
   slope.se<-rep(0,m.imp.val)
   int<-rep(0,m.imp.val)
@@ -233,16 +279,41 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
     cindex[i]<-rc["C Index"]
     cindex.se[i]<-rc["S.D."]/2
 
-    uno.C[i] <- survC1::Est.Cval(mydata=cbind(y[, 1],
-                                     y[, 2],
-                                     lp.val),
-                        tau=time, nofit=TRUE)$Dhat
+    Uno.data <- cbind(y[, 1], y[, 2], lp.val)
+    unoC[i] <- survC1::Est.Cval(mydata=Uno.data,
+                                 tau=time, nofit=TRUE)$Dhat
 
-    tdAUC[i] <- timeROC::timeROC(T=y.orig[, 1],
+    # Uno's SE
+    if (i==1&CI.metrics){
+      unoC.boot <- c()
+      for (itr in 1:n.iter){
+        boot <- Uno.data[sample(1:nrow(Uno.data), nrow(Uno.data), replace=TRUE),]
+        unoC <- survC1::Est.Cval(mydata=boot,
+                                  tau=time,
+                                  nofit=TRUE)$Dhat
+        unoC.boot <- c(unoC.boot, unoC)
+      }
+      unoC.se <- PredictionTools::Rubin.combine(mean(unoC.boot), stats::sd(unoC.boot))$se
+    }
+
+    tdAUC.i <- timeROC::timeROC(T=y.orig[, 1],
                                  delta=y.orig[, 2],
                                  marker=lp.val,
                                  times=time,
-                                 cause=1)$AUC[2]
+                                 cause=1,
+                                 iid=FALSE)
+    # time-dependent ROC SE
+    if (i==1&CI.metrics){
+      tdAUC.i <- timeROC::timeROC(T=y.orig[, 1],
+                                      delta=y.orig[, 2],
+                                      marker=lp.val,
+                                      times=time,
+                                      cause=1,
+                                      iid=TRUE)
+      tdAUC.CI <- stats::confint(tdAUC.i)
+      tdAUC.se <- as.numeric((as.numeric(tdAUC.CI$CI_AUC[2])/100-as.numeric(tdAUC.i$AUC[2]))/tdAUC.CI$C.alpha)
+    }
+    tdAUC[i] <- tdAUC.i$AUC[2]
 
     slope[i]<-f.val$coefficients[[1]]
     slope.se[i]<-sqrt(stats::vcov(f.val)[[1,1]])
@@ -328,7 +399,7 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
   int.mi<-Rubin.combine(int,int.se)
   slope.mi<-Rubin.combine(slope,slope.se)
   cindex.mi<-Rubin.combine(cindex,cindex.se)
-  uno.C.mi<-mean(uno.C)
+  unoC.mi<-mean(unoC)
   tdAUC.mi<-mean(tdAUC)
 
   legend.text <- c(paste("N =",format(n,big.mark=",")),
@@ -347,8 +418,16 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
                                  paste0(" [", format(round(cindex.mi$est+stats::qnorm(.025)*cindex.mi$se-optimism.C, 2), nsmall=2),
                                         "; ", format(round(cindex.mi$est+stats::qnorm(.975)*cindex.mi$se-optimism.C, 2), nsmall=2), "]"),
                                  "")),
-                   paste0("Uno's C-index = ", format(round(uno.C.mi,2),nsmall=2)),
-                   paste0("tdAUC = ", format(round(tdAUC.mi,2),nsmall=2)))
+                   paste0("Uno's C-index = ", format(round(unoC.mi,2),nsmall=2),
+                          ifelse(CI.metrics,
+                                 paste0(" [", format(round(unoC.mi+stats::qnorm(.025)*unoC.se-optimism.C, 2), nsmall=2),
+                                        "; ", format(round(unoC.mi+stats::qnorm(.975)*unoC.se-optimism.C, 2), nsmall=2), "]"),
+                                 "")),
+                   paste0("tdAUC = ", format(round(tdAUC.mi,2),nsmall=2),
+                          ifelse(CI.metrics,
+                                 paste0(" [", format(round(tdAUC.mi+stats::qnorm(.025)*tdAUC.se, 2), nsmall=2),
+                                        "; ", format(round(tdAUC.mi+stats::qnorm(.975)*tdAUC.se, 2), nsmall=2), "]"),
+                                 "")))
   if (sum(show.metrics)>0){
     graphics::legend(lim[1], lim[2], legend.text[show.metrics],
                    box.col="white",  bg = "white",cex=1)
@@ -367,8 +446,15 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
               slope.lower=slope.mi$est+stats::qnorm(.025)*slope.mi$se,
               slope.upper=slope.mi$est+stats::qnorm(.975)*slope.mi$se,
               cindex=cindex.mi$est,
+              cindex.se=cindex.mi$se,
               cindex.lower=cindex.mi$est+stats::qnorm(.025)*cindex.mi$se,
               cindex.upper=cindex.mi$est+stats::qnorm(.975)*cindex.mi$se,
-              uno.C=uno.C.mi,
-              tdAUC=tdAUC.mi))
+              unoC=unoC.mi,
+              unoC.se=unoC.se,
+              unoC.lower=unoC.mi+stats::qnorm(.025)*unoC.se,
+              unoC.upper=unoC.mi+stats::qnorm(.975)*unoC.se,
+              tdAUC=tdAUC.mi,
+              tdAUC.se=tdAUC.se,
+              unoC.lower=tdAUC.mi+stats::qnorm(.025)*tdAUC.se,
+              unoC.upper=tdAUC.mi+stats::qnorm(.975)*tdAUC.se))
 }
