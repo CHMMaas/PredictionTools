@@ -30,9 +30,9 @@
 #' @param dist distribution, default=TRUE
 #' @param CI plot confidence interval, default=FALSE
 #' @param df degrees of freedom to compute confidence interval, default=3
-#' @param CI.metrics plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, Uno's C-index, and time-dependent C-index, default=FALSE. Note: this might be time consuming depending on the number of observations and number of iterations (n.iter).
+#' @param CI.metrics plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, Uno's C-index, and the area under the time-dependent ROC curve (AUC), default=FALSE. Note: this might be time consuming depending on the number of observations and number of iterations (n.iter).
 #' @param n.iter n.iter number of iterations to calculate 95\% confidence interval of Uno's C-index
-#' @param show.metrics TRUE/FALSE vector of length 4 indicating if plot should show (1) sample size, (2) calibration intercept, (3) calibration slope, (4) Harrell's C-index possibly corrected with optimism specified in optimism.C, (5) Uno's C-index, (6) time-dependent AUC as defined by Blanche et al., default=rep(TRUE, 5)
+#' @param show.metrics TRUE/FALSE vector of length 4 indicating if plot should show (1) sample size, (2) calibration intercept, (3) calibration slope, (4) Harrell's C-index possibly corrected with optimism specified in optimism.C, (5) Uno's C-index, (6) the area under time-dependent ROC curve (AUC) as defined by Blanche et al., default=rep(TRUE, 5)
 #' @param optimism.C optimism-correction for Harrel's C-index in plot, default=0
 #'
 #' @return The output of the val_surv_mi function is a "list" with the following components.
