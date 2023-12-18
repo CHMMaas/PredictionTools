@@ -24,7 +24,7 @@
 #' @param p Matrix with predicted probabilities for imputation i in columns (complete case analysis: one column)
 #' @param y Time to event outcome as Surv object (time,status), unrestricted followup
 #' @param g Number of risk groups; default=5
-#' @param time Time point at which to evaluate the predicted probabilities, default=NULL (not entered), the maximum time point will be taken. Please note that tdAUC doesn't compute at maximum follow-up time, you can use show.metrics to omit these results from the plot.
+#' @param time Time point at which to evaluate the predicted probabilities, default=NULL (not entered), the maximum time point will be taken. Please note that AUC doesn't compute at maximum follow-up time, you can use show.metrics to omit these results from the plot.
 #' @param main Plot label, default=""
 #' @param lim limit, default=NULL
 #' @param dist distribution, default=TRUE
@@ -141,22 +141,22 @@
 #' lower bound of 95\% confidence interval of Uno's C-index
 #'
 #'
-#' tdAUC
+#' AUC
 #'
 #' time-dependent AUC, calculated using inverse propensity score weighting by the timeROC package, uncorrected for optimism
 #'
 #'
-#' tdAUC.se
+#' AUC.se
 #'
 #' standard error of time-dependent AUC, based one a single imputation
 #'
 #'
-#' tdAUC.lower
+#' AUC.lower
 #'
 #' lower bound of 95\% confidence interval of time-dependent AUC
 #'
 #'
-#' tdAUC.upper
+#' AUC.upper
 #'
 #' upper bound of 95\% confidence interval of time-dependent AUC
 #'
@@ -251,8 +251,8 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
   cindex.se<-rep(0,m.imp.val)
   unoC<-rep(0, m.imp.val)
   unoC.se<-0
-  tdAUC<-rep(0, m.imp.val)
-  tdAUC.se<-0
+  AUC<-rep(0, m.imp.val)
+  AUC.se<-0
   slope<-rep(0,m.imp.val)
   slope.se<-rep(0,m.imp.val)
   int<-rep(0,m.imp.val)
@@ -296,7 +296,7 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
       unoC.se <- PredictionTools::Rubin.combine(mean(unoC.boot), stats::sd(unoC.boot))$se
     }
 
-    tdAUC.i <- timeROC::timeROC(T=y.orig[, 1],
+    AUC.i <- timeROC::timeROC(T=y.orig[, 1],
                                  delta=y.orig[, 2],
                                  marker=lp.val,
                                  times=time,
@@ -304,16 +304,16 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
                                  iid=FALSE)
     # time-dependent ROC SE
     if (i==1&CI.metrics){
-      tdAUC.i <- timeROC::timeROC(T=y.orig[, 1],
+      AUC.i <- timeROC::timeROC(T=y.orig[, 1],
                                       delta=y.orig[, 2],
                                       marker=lp.val,
                                       times=time,
                                       cause=1,
                                       iid=TRUE)
-      tdAUC.CI <- stats::confint(tdAUC.i)
-      tdAUC.se <- as.numeric((as.numeric(tdAUC.CI$CI_AUC[2])/100-as.numeric(tdAUC.i$AUC[2]))/tdAUC.CI$C.alpha)
+      AUC.CI <- stats::confint(AUC.i)
+      AUC.se <- as.numeric((as.numeric(AUC.CI$CI_AUC[2])/100-as.numeric(AUC.i$AUC[2]))/AUC.CI$C.alpha)
     }
-    tdAUC[i] <- tdAUC.i$AUC[2]
+    AUC[i] <- AUC.i$AUC[2]
 
     slope[i]<-f.val$coefficients[[1]]
     slope.se[i]<-sqrt(stats::vcov(f.val)[[1,1]])
@@ -400,7 +400,7 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
   slope.mi<-Rubin.combine(slope,slope.se)
   cindex.mi<-Rubin.combine(cindex,cindex.se)
   unoC.mi<-mean(unoC)
-  tdAUC.mi<-mean(tdAUC)
+  AUC.mi<-mean(AUC)
 
   legend.text <- c(paste("N =",format(n,big.mark=",")),
                    paste0("Intercept = ",format(round(int.mi$est,2),nsmall=2),
@@ -423,10 +423,10 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
                                  paste0(" [", format(round(unoC.mi+stats::qnorm(.025)*unoC.se-optimism.C, 2), nsmall=2),
                                         "; ", format(round(unoC.mi+stats::qnorm(.975)*unoC.se-optimism.C, 2), nsmall=2), "]"),
                                  "")),
-                   paste0("tdAUC = ", format(round(tdAUC.mi,2),nsmall=2),
+                   paste0("AUC = ", format(round(AUC.mi,2),nsmall=2),
                           ifelse(CI.metrics,
-                                 paste0(" [", format(round(tdAUC.mi+stats::qnorm(.025)*tdAUC.se, 2), nsmall=2),
-                                        "; ", format(round(tdAUC.mi+stats::qnorm(.975)*tdAUC.se, 2), nsmall=2), "]"),
+                                 paste0(" [", format(round(AUC.mi+stats::qnorm(.025)*AUC.se, 2), nsmall=2),
+                                        "; ", format(round(AUC.mi+stats::qnorm(.975)*AUC.se, 2), nsmall=2), "]"),
                                  "")))
   if (sum(show.metrics)>0){
     graphics::legend(lim[1], lim[2], legend.text[show.metrics],
@@ -453,8 +453,8 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
               unoC.se=unoC.se,
               unoC.lower=unoC.mi+stats::qnorm(.025)*unoC.se,
               unoC.upper=unoC.mi+stats::qnorm(.975)*unoC.se,
-              tdAUC=tdAUC.mi,
-              tdAUC.se=tdAUC.se,
-              tdAUC.lower=tdAUC.mi+stats::qnorm(.025)*tdAUC.se,
-              tdAUC.upper=tdAUC.mi+stats::qnorm(.975)*tdAUC.se))
+              AUC=AUC.mi,
+              AUC.se=AUC.se,
+              AUC.lower=AUC.mi+stats::qnorm(.025)*AUC.se,
+              AUC.upper=AUC.mi+stats::qnorm(.975)*AUC.se))
 }

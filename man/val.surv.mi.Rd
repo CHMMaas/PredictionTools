@@ -27,7 +27,7 @@ val.surv.mi(
 
 \item{g}{Number of risk groups; default=5}
 
-\item{time}{Time point at which to evaluate the predicted probabilities, default=NULL (not entered), the maximum time point will be taken. Please note that tdAUC doesn't compute at maximum follow-up time, you can use show.metrics to omit these results from the plot.}
+\item{time}{Time point at which to evaluate the predicted probabilities, default=NULL (not entered), the maximum time point will be taken. Please note that AUC doesn't compute at maximum follow-up time, you can use show.metrics to omit these results from the plot.}
 
 \item{main}{Plot label, default=""}
 
@@ -154,22 +154,22 @@ unoC.lower
 lower bound of 95\% confidence interval of Uno's C-index
 
 
-tdAUC
+AUC
 
 time-dependent AUC, calculated using inverse propensity score weighting by the timeROC package, uncorrected for optimism
 
 
-tdAUC.se
+AUC.se
 
 standard error of time-dependent AUC, based one a single imputation
 
 
-tdAUC.lower
+AUC.lower
 
 lower bound of 95\% confidence interval of time-dependent AUC
 
 
-tdAUC.upper
+AUC.upper
 
 upper bound of 95\% confidence interval of time-dependent AUC
 }
