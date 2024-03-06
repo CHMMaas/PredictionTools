@@ -115,41 +115,41 @@ slope.upper
 upper bound of 95\% confidence interval of slope.
 
 
-cindex
+HarrellC
 
 Harrell's C-index, uncorrected for optimism.
 
 
-cindex.se
+HarrellC.se
 
 standard error of Harrell's C-index
 
 
-cindex.lower
+HarrellC.lower
 
 lower bound of 95\% confidence interval of Harrell's C-index
 
-cindex.upper
+HarrellC.upper
 
 upper bound of 95\% confidence interval of Harrell's C-index.
 
 
-unoC
+UnoC
 
 Uno's C-index for time-to-event outcomes, uncorrected for optimism
 
 
-unoC.se
+UnoC.se
 
 standard error of Uno's C-index, based one a single imputation
 
 
-unoC.lower
+UnoC.lower
 
 lower bound of 95\% confidence interval of Uno's C-index
 
 
-unoC.lower
+UnoC.lower
 
 lower bound of 95\% confidence interval of Uno's C-index
 
@@ -226,7 +226,9 @@ for (i in 1:m){
 g <- 4
 main <- paste("Calibration plot for predictions at time",  horizon)
 show.metrics <- rep(TRUE, 5)
+CI.metrics <- TRUE
 PredictionTools::val.surv.mi(p=as.matrix(p), y=S,
                              g=g, main=main, time=horizon,
-                             show.metrics=show.metrics)
+                             show.metrics=show.metrics,
+                             CI.metrics=CI.metrics)
 }

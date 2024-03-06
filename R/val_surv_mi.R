@@ -6,7 +6,7 @@
 #' @importFrom rms rcs
 #' @importFrom survival coxph
 #' @importFrom survival survfit
-#' @importFrom Hmisc rcorr.cens
+#' @importFrom survival concordance
 #' @importFrom grDevices dev.off
 #' @importFrom grDevices png
 #' @importFrom graphics abline
@@ -102,41 +102,41 @@
 #' upper bound of 95\% confidence interval of slope.
 #'
 #'
-#' cindex
+#' HarrellC
 #'
 #' Harrell's C-index, uncorrected for optimism.
 #'
 #'
-#' cindex.se
+#' HarrellC.se
 #'
 #' standard error of Harrell's C-index
 #'
 #'
-#' cindex.lower
+#' HarrellC.lower
 #'
 #' lower bound of 95\% confidence interval of Harrell's C-index
 #'
-#' cindex.upper
+#' HarrellC.upper
 #'
 #' upper bound of 95\% confidence interval of Harrell's C-index.
 #'
 #'
-#' unoC
+#' UnoC
 #'
 #' Uno's C-index for time-to-event outcomes, uncorrected for optimism
 #'
 #'
-#' unoC.se
+#' UnoC.se
 #'
 #' standard error of Uno's C-index, based one a single imputation
 #'
 #'
-#' unoC.lower
+#' UnoC.lower
 #'
 #' lower bound of 95\% confidence interval of Uno's C-index
 #'
 #'
-#' unoC.lower
+#' UnoC.lower
 #'
 #' lower bound of 95\% confidence interval of Uno's C-index
 #'
@@ -213,9 +213,11 @@
 #' g <- 4
 #' main <- paste("Calibration plot for predictions at time",  horizon)
 #' show.metrics <- rep(TRUE, 5)
+#' CI.metrics <- TRUE
 #' PredictionTools::val.surv.mi(p=as.matrix(p), y=S,
 #'                              g=g, main=main, time=horizon,
-#'                              show.metrics=show.metrics)
+#'                              show.metrics=show.metrics,
+#'                              CI.metrics=CI.metrics)
 val.surv.mi<-function(p, y, g=5, time=NULL,
                       main="", lim=c(0,1), dist=TRUE, CI=FALSE, df=3,
                       CI.metrics=FALSE, show.metrics=rep(TRUE, 4), n.iter=10,
@@ -247,10 +249,10 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
   n<-length(y)
   m.imp.val<-ncol(lp)
 
-  cindex<-rep(0,m.imp.val)
-  cindex.se<-rep(0,m.imp.val)
-  unoC<-rep(0, m.imp.val)
-  unoC.se<-0
+  HarrellC<-rep(0,m.imp.val)
+  HarrellC.se<-rep(0,m.imp.val)
+  UnoC<-rep(0, m.imp.val)
+  UnoC.se<-rep(0, m.imp.val)
   AUC<-rep(0, m.imp.val)
   AUC.se<-0
   slope<-rep(0,m.imp.val)
@@ -269,41 +271,32 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
 
     f.val<-survival::coxph(y~lp.val)
     f.val.offset<-survival::coxph(y~offset(lp.val))
-    f.val.rcs<-rms::cph(y~rms::rcs(lp.val,df),x=TRUE,y=TRUE) # TODO: make df adjustable
 
-    surv.sm<-Predict(f.val.rcs,lp.val=lp.range,conf.int = 0.95, conf.type = "simultaneous",time=max(y[,1]))
-    lp.sm[,i]<-log(-log(surv.sm$yhat))
-    lp.sm.se[,i]<-(log(-log(surv.sm$upper))-log(-log(surv.sm$lower)))/(stats::qnorm(.975)-stats::qnorm(.025))
+    # f.val.rcs<-rms::cph(y~rms::rcs(lp.val,df),x=TRUE,y=TRUE) # TODO: make df adjustable
+    # surv.sm<-Predict(f.val.rcs,lp.val=lp.range,conf.int = 0.95, conf.type = "simultaneous",time=max(y[,1]))
+    # lp.sm[,i]<-log(-log(surv.sm$yhat))
+    # lp.sm.se[,i]<-(log(-log(surv.sm$upper))-log(-log(surv.sm$lower)))/(stats::qnorm(.975)-stats::qnorm(.025))
 
-    rc<-Hmisc::rcorr.cens(-lp.val,y)
-    cindex[i]<-rc["C Index"]
-    cindex.se[i]<-rc["S.D."]/2
+    # Harrell's C-index
+    rc.H<-survival::concordance(f.val, timewt="n")
+    HarrellC[i]<-rc.H$concordance
+    HarrellC.se[i]<-sqrt(rc.H$var)
 
-    Uno.data <- cbind(y[, 1], y[, 2], lp.val)
-    unoC[i] <- survC1::Est.Cval(mydata=Uno.data,
-                                 tau=time, nofit=TRUE)$Dhat
+    # Uno's C-index
+    rc.U<-survival::concordance(f.val, timewt="n/G2")
+    UnoC[i]<-rc.U$concordance
+    UnoC.se[i]<-sqrt(rc.U$var)
 
-    # Uno's SE
-    if (i==1&CI.metrics){
-      unoC.boot <- c()
-      for (itr in 1:n.iter){
-        boot <- Uno.data[sample(1:nrow(Uno.data), nrow(Uno.data), replace=TRUE),]
-        unoC <- survC1::Est.Cval(mydata=boot,
-                                  tau=time,
-                                  nofit=TRUE)$Dhat
-        unoC.boot <- c(unoC.boot, unoC)
-      }
-      unoC.se <- PredictionTools::Rubin.combine(mean(unoC.boot), stats::sd(unoC.boot))$se
-    }
-
-    AUC.i <- timeROC::timeROC(T=y.orig[, 1],
+    # Time-dependent ROC
+    AUC[i] <- timeROC::timeROC(T=y.orig[, 1],
                                  delta=y.orig[, 2],
                                  marker=lp.val,
                                  times=time,
                                  cause=1,
-                                 iid=FALSE)
+                                 iid=FALSE)$AUC[2]
+
     # time-dependent ROC SE
-    if (i==1&CI.metrics){
+    if (CI.metrics){
       AUC.i <- timeROC::timeROC(T=y.orig[, 1],
                                       delta=y.orig[, 2],
                                       marker=lp.val,
@@ -311,9 +304,8 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
                                       cause=1,
                                       iid=TRUE)
       AUC.CI <- stats::confint(AUC.i)
-      AUC.se <- as.numeric((as.numeric(AUC.CI$CI_AUC[2])/100-as.numeric(AUC.i$AUC[2]))/AUC.CI$C.alpha)
+      AUC.se[i] <- as.numeric((as.numeric(AUC.CI$CI_AUC[2])/100-as.numeric(AUC.i$AUC[2]))/AUC.CI$C.alpha)
     }
-    AUC[i] <- AUC.i$AUC[2]
 
     slope[i]<-f.val$coefficients[[1]]
     slope.se[i]<-sqrt(stats::vcov(f.val)[[1,1]])
@@ -398,9 +390,15 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
 
   int.mi<-Rubin.combine(int,int.se)
   slope.mi<-Rubin.combine(slope,slope.se)
-  cindex.mi<-Rubin.combine(cindex,cindex.se)
-  unoC.mi<-mean(unoC)
-  AUC.mi<-mean(AUC)
+  HarrellC.mi<-Rubin.combine(HarrellC,HarrellC.se)
+  UnoC.mi<-Rubin.combine(UnoC,UnoC.se)
+  if(CI.metrics){
+    AUC.mi<-Rubin.combine(AUC,AUC.se)
+  } else{
+    AUC.mi <- list()
+    AUC.mi$est <- mean(AUC)
+    AUC.mi$se <- 0
+  }
 
   legend.text <- c(paste("N =",format(n,big.mark=",")),
                    paste0("Intercept = ",format(round(int.mi$est,2),nsmall=2),
@@ -413,20 +411,20 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
                                  paste0(" [", format(round(slope.mi$est+stats::qnorm(.025)*slope.mi$se, 2), nsmall=2),
                                         "; ", format(round(slope.mi$est+stats::qnorm(.975)*slope.mi$se, 2), nsmall=2), "]"),
                                  "")),
-                   paste0("Harrell's C-index = ",format(round(cindex.mi$est-optimism.C,2),nsmall=2),
+                   paste0("Harrell's C-index = ",format(round(HarrellC.mi$est-optimism.C,2),nsmall=2),
                           ifelse(CI.metrics,
-                                 paste0(" [", format(round(cindex.mi$est+stats::qnorm(.025)*cindex.mi$se-optimism.C, 2), nsmall=2),
-                                        "; ", format(round(cindex.mi$est+stats::qnorm(.975)*cindex.mi$se-optimism.C, 2), nsmall=2), "]"),
+                                 paste0(" [", format(round(HarrellC.mi$est+stats::qnorm(.025)*HarrellC.mi$se-optimism.C, 2), nsmall=2),
+                                        "; ", format(round(HarrellC.mi$est+stats::qnorm(.975)*HarrellC.mi$se-optimism.C, 2), nsmall=2), "]"),
                                  "")),
-                   paste0("Uno's C-index = ", format(round(unoC.mi,2),nsmall=2),
+                   paste0("Uno's C-index = ", format(round(UnoC.mi$est,2),nsmall=2),
                           ifelse(CI.metrics,
-                                 paste0(" [", format(round(unoC.mi+stats::qnorm(.025)*unoC.se-optimism.C, 2), nsmall=2),
-                                        "; ", format(round(unoC.mi+stats::qnorm(.975)*unoC.se-optimism.C, 2), nsmall=2), "]"),
+                                 paste0(" [", format(round(UnoC.mi$est+stats::qnorm(.025)*UnoC.mi$se-optimism.C, 2), nsmall=2),
+                                        "; ", format(round(UnoC.mi$est+stats::qnorm(.975)*UnoC.mi$se-optimism.C, 2), nsmall=2), "]"),
                                  "")),
-                   paste0("AUC = ", format(round(AUC.mi,2),nsmall=2),
+                   paste0("AUC = ", format(round(AUC.mi$est,2),nsmall=2),
                           ifelse(CI.metrics,
-                                 paste0(" [", format(round(AUC.mi+stats::qnorm(.025)*AUC.se, 2), nsmall=2),
-                                        "; ", format(round(AUC.mi+stats::qnorm(.975)*AUC.se, 2), nsmall=2), "]"),
+                                 paste0(" [", format(round(AUC.mi$est+stats::qnorm(.025)*AUC.mi$se, 2), nsmall=2),
+                                        "; ", format(round(AUC.mi$est+stats::qnorm(.975)*AUC.mi$se, 2), nsmall=2), "]"),
                                  "")))
   if (sum(show.metrics)>0){
     graphics::legend(lim[1], lim[2], legend.text[show.metrics],
@@ -445,16 +443,16 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
               slope=slope.mi$est,
               slope.lower=slope.mi$est+stats::qnorm(.025)*slope.mi$se,
               slope.upper=slope.mi$est+stats::qnorm(.975)*slope.mi$se,
-              cindex=cindex.mi$est,
-              cindex.se=cindex.mi$se,
-              cindex.lower=cindex.mi$est+stats::qnorm(.025)*cindex.mi$se,
-              cindex.upper=cindex.mi$est+stats::qnorm(.975)*cindex.mi$se,
-              unoC=unoC.mi,
-              unoC.se=unoC.se,
-              unoC.lower=unoC.mi+stats::qnorm(.025)*unoC.se,
-              unoC.upper=unoC.mi+stats::qnorm(.975)*unoC.se,
-              AUC=AUC.mi,
-              AUC.se=AUC.se,
-              AUC.lower=AUC.mi+stats::qnorm(.025)*AUC.se,
-              AUC.upper=AUC.mi+stats::qnorm(.975)*AUC.se))
+              HarrellC=HarrellC.mi$est,
+              HarrellC.se=HarrellC.mi$se,
+              HarrellC.lower=HarrellC.mi$est+stats::qnorm(.025)*HarrellC.mi$se,
+              HarrellC.upper=HarrellC.mi$est+stats::qnorm(.975)*HarrellC.mi$se,
+              UnoC=UnoC.mi$est,
+              UnoC.se=UnoC.mi$se,
+              UnoC.lower=UnoC.mi$est+stats::qnorm(.025)*UnoC.mi$se,
+              UnoC.upper=UnoC.mi$est+stats::qnorm(.975)*UnoC.mi$se,
+              AUC=AUC.mi$est,
+              AUC.se=AUC.mi$se,
+              AUC.lower=AUC.mi$est+stats::qnorm(.025)*AUC.mi$se,
+              AUC.upper=AUC.mi$est+stats::qnorm(.975)*AUC.mi$se))
 }
