@@ -136,17 +136,43 @@
 #'
 #' @examples
 #' library(PredictionTools)
+#' library(survival)
+#' library(rms)
+#' library(mice)
 #' set.seed(1)
-#' n <- 100
-#' m <- 5 # number of imputations
-#' lp.val <- matrix(rnorm(n*m, 0, 1), n, m)
-#' y.val <- rbinom(n, 1, 0.5)
+#'
+#' # load data
+#' data(pbc, package="survival")
+#'
+#' # Multiple imputation
+#' m <- 5
+#' candidate.predictors <- c("sex", "age", "bili", "ascites", "hepato")
+#' imp <- mice::mice(pbc[, candidate.predictors], m=m, print=FALSE)
+#'
+#' # set outcome
+#' y <- as.numeric(pbc$status!=0)
+#'
+#' lp.mi <- c()
+#' for (i in 1:m){
+#'   # fit model
+#'   model.i <- lrm(y ~ sex + age + bili + ascites + hepato,
+#'                  data=mice::complete(imp, i),
+#'                  x=TRUE, y=TRUE, se.fit=TRUE)
+#'
+#'   # make predictions
+#'   lp.i <- predict(model.i, type="lp")
+#'
+#'   # add to p
+#'   lp.mi <- cbind(lp.mi, lp.i)
+#' }
+#' # internally validate predictions
 #' g <- 4
-#' main <- "Plot label"
+#' main <- "Calibration plot for predictions"
+#' show.metrics <- rep(TRUE, 5)
 #' lim <- c(0, 1)
-#' show.metrics <- rep(TRUE, 9)
-#' PredictionTools::val.prob.mi(lp.mi=lp.val, y=y.val, g=g, main=main,
-#'                               show.metrics=show.metrics, lim=lim)
+#' PredictionTools::val.prob.mi(lp.mi=lp.mi, y=y,
+#'                              g=g, main=main,
+#'                              show.metrics=show.metrics, lim=lim)
 val.prob.mi<-function(lp.mi, y, g=5,
                       main="", lim=c(0, 1), dist=FALSE, smoothed.curve=TRUE,
                       show.metrics=rep(TRUE, 9), CI.metrics=FALSE, optimism.C=0){
@@ -200,10 +226,9 @@ val.prob.mi<-function(lp.mi, y, g=5,
     f.val.offset<-stats::glm(y~offset(lp.val),family='binomial')
 
     # C-index
-    rc<-rcorr.cens(lp.val,y)
-    cindex[i]<-rc["C Index"]
-    cindex.se[i]<-rc["S.D."]/2
-    #cindex[i]<-f.val$stats["C"]
+    rc.H<-survival::concordance(f.val)
+    cindex[i]<-rc.H$concordance
+    cindex.se[i]<-sqrt(rc.H$var)
 
     # slope
     slope[i]<-f.val$coefficients[[2]]
