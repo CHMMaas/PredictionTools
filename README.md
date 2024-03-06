@@ -19,12 +19,15 @@ Update 4 December 2023: added features
 1. indicate whether to show confidence interval in calibration plot;
 2. add optimism corrected C-index in calibration plot.
 
-Update 5 december 2023: added features
+Update 5 December 2023: added features
 1. Uno's C-index for val.surv.mi()
 
-Update 8 december 2023: added features
+Update 8 December 2023: added features
 1. fun.event() function added that translates linear predictor and baseline hazard for a specific time point into predicted probabilities
 2. Updated the example of val.surv.mi()
+
+Update 6 March 2024: improved speed
+1. Use concordance() instead of rcorr.cens() to improve speed
 
 # Load
 library(PredictionTools)
