@@ -32,7 +32,7 @@
 #' @param df degrees of freedom to compute confidence interval, default=3
 #' @param CI.metrics plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, Uno's C-index, and the area under the time-dependent ROC curve (AUC), default=FALSE. Note: this might be time consuming depending on the number of observations and number of iterations (n.iter).
 #' @param n.iter n.iter number of iterations to calculate 95\% confidence interval of Uno's C-index
-#' @param show.metrics TRUE/FALSE vector of length 4 indicating if plot should show (1) sample size, (2) calibration intercept, (3) calibration slope, (4) Harrell's C-index possibly corrected with optimism specified in optimism.C, (5) Uno's C-index, (6) the area under time-dependent ROC curve (AUC) as defined by Blanche et al., default=rep(TRUE, 5)
+#' @param show.metrics TRUE/FALSE vector of length 6 indicating if plot should show (1) sample size, (2) calibration intercept, (3) calibration slope, (4) Harrell's C-index possibly corrected with optimism specified in optimism.C, (5) Uno's C-index, (6) the area under time-dependent ROC curve (AUC) as defined by Blanche et al., default=rep(TRUE, 6)
 #' @param optimism.C optimism-correction for Harrel's C-index in plot, default=0
 #'
 #' @return The output of the val_surv_mi function is a "list" with the following components.
@@ -212,7 +212,7 @@
 #' # internally validate predictions
 #' g <- 4
 #' main <- paste("Calibration plot for predictions at time",  horizon)
-#' show.metrics <- rep(TRUE, 5)
+#' show.metrics <- rep(TRUE, 6)
 #' CI.metrics <- TRUE
 #' PredictionTools::val.surv.mi(p=as.matrix(p), y=S,
 #'                              g=g, main=main, time=horizon,
@@ -220,7 +220,7 @@
 #'                              CI.metrics=CI.metrics)
 val.surv.mi<-function(p, y, g=5, time=NULL,
                       main="", lim=c(0,1), dist=TRUE, CI=FALSE, df=3,
-                      CI.metrics=FALSE, show.metrics=rep(TRUE, 4), n.iter=10,
+                      CI.metrics=FALSE, show.metrics=rep(TRUE, 6), n.iter=10,
                       optimism.C=0){
   stopifnot("p must be numeric" = is.numeric(p))
   stopifnot("y must be numeric" = is.numeric(y))
@@ -249,16 +249,16 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
   n<-length(y)
   m.imp.val<-ncol(lp)
 
+  int<-rep(0,m.imp.val)
+  int.se<-rep(0,m.imp.val)
+  slope<-rep(0,m.imp.val)
+  slope.se<-rep(0,m.imp.val)
   HarrellC<-rep(0,m.imp.val)
   HarrellC.se<-rep(0,m.imp.val)
   UnoC<-rep(0, m.imp.val)
   UnoC.se<-rep(0, m.imp.val)
   AUC<-rep(0, m.imp.val)
   AUC.se<-0
-  slope<-rep(0,m.imp.val)
-  slope.se<-rep(0,m.imp.val)
-  int<-rep(0,m.imp.val)
-  int.se<-rep(0,m.imp.val)
 
   p.groups<-array(rep(0,g*m.imp.val),dim=c(m.imp.val,g),dimnames=list(1:m.imp.val,1:g))
   y.groups<-array(rep(0,2*g*m.imp.val),dim=c(m.imp.val,g,2),dimnames=list(1:m.imp.val,1:g,c("obs","se")))
@@ -268,53 +268,59 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
 
   for (i in 1:m.imp.val){
     lp.val<-lp[,i]
-
     f.val<-survival::coxph(y~lp.val)
     f.val.offset<-survival::coxph(y~offset(lp.val))
 
-    # f.val.rcs<-rms::cph(y~rms::rcs(lp.val,df),x=TRUE,y=TRUE) # TODO: make df adjustable
-    # surv.sm<-Predict(f.val.rcs,lp.val=lp.range,conf.int = 0.95, conf.type = "simultaneous",time=max(y[,1]))
-    # lp.sm[,i]<-log(-log(surv.sm$yhat))
-    # lp.sm.se[,i]<-(log(-log(surv.sm$upper))-log(-log(surv.sm$lower)))/(stats::qnorm(.975)-stats::qnorm(.025))
-
-    # Harrell's C-index
-    rc.H<-survival::concordance(f.val, timewt="n")
-    HarrellC[i]<-rc.H$concordance
-    HarrellC.se[i]<-sqrt(rc.H$var)
-
-    # Uno's C-index
-    rc.U<-survival::concordance(f.val, timewt="n/G2")
-    UnoC[i]<-rc.U$concordance
-    UnoC.se[i]<-sqrt(rc.U$var)
-
-    # Time-dependent ROC
-    AUC[i] <- timeROC::timeROC(T=y.orig[, 1],
-                                 delta=y.orig[, 2],
-                                 marker=lp.val,
-                                 times=time,
-                                 cause=1,
-                                 iid=FALSE)$AUC[2]
-
-    # time-dependent ROC SE
-    if (CI.metrics){
-      AUC.i <- timeROC::timeROC(T=y.orig[, 1],
-                                      delta=y.orig[, 2],
-                                      marker=lp.val,
-                                      times=time,
-                                      cause=1,
-                                      iid=TRUE)
-      AUC.CI <- stats::confint(AUC.i)
-      AUC.se[i] <- as.numeric((as.numeric(AUC.CI$CI_AUC[2])/100-as.numeric(AUC.i$AUC[2]))/AUC.CI$C.alpha)
+    if (show.metrics[2]){
+      # calibration intercept
+      sf<-survival::survfit(f.val.offset,conf.type="log-log")
+      log.H<-log(-log(utils::tail(sf$surv,1)))
+      log.H.upper<-log(-log(utils::tail(sf$upper,1)))
+      int[i]<-log.H-mean(f.val.offset$linear.predictors)
+      int.se[i]<-(log.H-log.H.upper)/stats::qnorm(.975)
     }
 
-    slope[i]<-f.val$coefficients[[1]]
-    slope.se[i]<-sqrt(stats::vcov(f.val)[[1,1]])
+    if (show.metrics[3]){
+      # calibration slope
+      slope[i]<-f.val$coefficients[[1]]
+      slope.se[i]<-sqrt(stats::vcov(f.val)[[1,1]])
+    }
 
-    sf<-survival::survfit(f.val.offset,conf.type="log-log")
-    log.H<-log(-log(utils::tail(sf$surv,1)))
-    log.H.upper<-log(-log(utils::tail(sf$upper,1)))
-    int[i]<-log.H-mean(f.val.offset$linear.predictors)
-    int.se[i]<-(log.H-log.H.upper)/stats::qnorm(.975)
+    if (show.metrics[4]){
+      # Harrell's C-index
+      rc.H<-survival::concordance(f.val, timewt="n")
+      HarrellC[i]<-rc.H$concordance
+      HarrellC.se[i]<-sqrt(rc.H$var)
+    }
+
+    if (show.metrics[5]){
+      # Uno's C-index
+      rc.U<-survival::concordance(f.val, timewt="n/G2")
+      UnoC[i]<-rc.U$concordance
+      UnoC.se[i]<-sqrt(rc.U$var)
+    }
+
+    if (show.metrics[6]){
+      # Time-dependent ROC
+      AUC[i] <- timeROC::timeROC(T=y.orig[, 1],
+                                   delta=y.orig[, 2],
+                                   marker=lp.val,
+                                   times=time,
+                                   cause=1,
+                                   iid=FALSE)$AUC[2]
+
+      # time-dependent ROC SE
+      if (CI.metrics){
+        AUC.i <- timeROC::timeROC(T=y.orig[, 1],
+                                        delta=y.orig[, 2],
+                                        marker=lp.val,
+                                        times=time,
+                                        cause=1,
+                                        iid=TRUE)
+        AUC.CI <- stats::confint(AUC.i)
+        AUC.se[i] <- as.numeric((as.numeric(AUC.CI$CI_AUC[2])/100-as.numeric(AUC.i$AUC[2]))/AUC.CI$C.alpha)
+      }
+    }
 
     p.val<-p[,i]
     quants<-stats::quantile(p.val,(1:(g-1))/g)

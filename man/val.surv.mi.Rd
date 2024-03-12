@@ -15,7 +15,7 @@ val.surv.mi(
   CI = FALSE,
   df = 3,
   CI.metrics = FALSE,
-  show.metrics = rep(TRUE, 4),
+  show.metrics = rep(TRUE, 6),
   n.iter = 10,
   optimism.C = 0
 )
@@ -41,7 +41,7 @@ val.surv.mi(
 
 \item{CI.metrics}{plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, Uno's C-index, and the area under the time-dependent ROC curve (AUC), default=FALSE. Note: this might be time consuming depending on the number of observations and number of iterations (n.iter).}
 
-\item{show.metrics}{TRUE/FALSE vector of length 4 indicating if plot should show (1) sample size, (2) calibration intercept, (3) calibration slope, (4) Harrell's C-index possibly corrected with optimism specified in optimism.C, (5) Uno's C-index, (6) the area under time-dependent ROC curve (AUC) as defined by Blanche et al., default=rep(TRUE, 5)}
+\item{show.metrics}{TRUE/FALSE vector of length 6 indicating if plot should show (1) sample size, (2) calibration intercept, (3) calibration slope, (4) Harrell's C-index possibly corrected with optimism specified in optimism.C, (5) Uno's C-index, (6) the area under time-dependent ROC curve (AUC) as defined by Blanche et al., default=rep(TRUE, 6)}
 
 \item{n.iter}{n.iter number of iterations to calculate 95\% confidence interval of Uno's C-index}
 
@@ -225,7 +225,7 @@ for (i in 1:m){
 # internally validate predictions
 g <- 4
 main <- paste("Calibration plot for predictions at time",  horizon)
-show.metrics <- rep(TRUE, 5)
+show.metrics <- rep(TRUE, 6)
 CI.metrics <- TRUE
 PredictionTools::val.surv.mi(p=as.matrix(p), y=S,
                              g=g, main=main, time=horizon,
