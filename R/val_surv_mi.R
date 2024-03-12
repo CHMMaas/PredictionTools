@@ -258,7 +258,7 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
   UnoC<-rep(0, m.imp.val)
   UnoC.se<-rep(0, m.imp.val)
   AUC<-rep(0, m.imp.val)
-  AUC.se<-0
+  AUC.se<-rep(0, m.imp.val)
 
   p.groups<-array(rep(0,g*m.imp.val),dim=c(m.imp.val,g),dimnames=list(1:m.imp.val,1:g))
   y.groups<-array(rep(0,2*g*m.imp.val),dim=c(m.imp.val,g,2),dimnames=list(1:m.imp.val,1:g,c("obs","se")))
