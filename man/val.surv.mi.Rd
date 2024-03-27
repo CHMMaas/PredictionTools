@@ -16,7 +16,6 @@ val.surv.mi(
   df = 3,
   CI.metrics = FALSE,
   show.metrics = rep(TRUE, 6),
-  n.iter = 10,
   optimism.C = 0
 )
 }
@@ -39,11 +38,9 @@ val.surv.mi(
 
 \item{df}{degrees of freedom to compute confidence interval, default=3}
 
-\item{CI.metrics}{plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, Uno's C-index, and the area under the time-dependent ROC curve (AUC), default=FALSE. Note: this might be time consuming depending on the number of observations and number of iterations (n.iter).}
+\item{CI.metrics}{plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, Uno's C-index, and the area under the time-dependent ROC curve (AUC), default=FALSE.}
 
 \item{show.metrics}{TRUE/FALSE vector of length 6 indicating if plot should show (1) sample size, (2) calibration intercept, (3) calibration slope, (4) Harrell's C-index possibly corrected with optimism specified in optimism.C, (5) Uno's C-index, (6) the area under time-dependent ROC curve (AUC) as defined by Blanche et al., default=rep(TRUE, 6)}
-
-\item{n.iter}{n.iter number of iterations to calculate 95\% confidence interval of Uno's C-index}
 
 \item{optimism.C}{optimism-correction for Harrel's C-index in plot, default=0}
 }
