@@ -29,6 +29,9 @@ Update 8 December 2023: added features
 Update 6 March 2024: improved speed
 1. Use concordance() instead of rcorr.cens() to improve speed
 
+Update 27 March 2024: n.iter argument removed
+1. Standard error of Uno's C-index is not calculated by bootstrapping anymore, so the argument n.iter is removed
+
 # Load
 library(PredictionTools)
 
