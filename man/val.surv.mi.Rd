@@ -22,7 +22,7 @@ val.surv.mi(
 \arguments{
 \item{p}{Matrix with predicted probabilities for imputation i in columns (complete case analysis: one column)}
 
-\item{y}{Time to event outcome as Surv object (time,status), unrestricted followup}
+\item{y}{Time to event outcome as Surv object (time,status), unrestricted followup. Note: if one enters a Surv() object here where follow-up time is restricted to the horizon, time-dependent AUC cannot be calculated, and it will return NA values.}
 
 \item{g}{Number of risk groups; default=5}
 
@@ -38,7 +38,7 @@ val.surv.mi(
 
 \item{df}{degrees of freedom to compute confidence interval, default=3}
 
-\item{CI.metrics}{plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, Uno's C-index, and the area under the time-dependent ROC curve (AUC), default=FALSE.}
+\item{CI.metrics}{plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, Uno's C-index, and the area under the time-dependent ROC curve (AUC), default=FALSE. Note, the calculation of the CI of the AUC can take a long time.}
 
 \item{show.metrics}{TRUE/FALSE vector of length 6 indicating if plot should show (1) sample size, (2) calibration intercept, (3) calibration slope, (4) Harrell's C-index possibly corrected with optimism specified in optimism.C, (5) Uno's C-index, (6) the area under time-dependent ROC curve (AUC) as defined by Blanche et al., default=rep(TRUE, 6)}
 

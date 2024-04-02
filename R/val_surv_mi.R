@@ -22,7 +22,7 @@
 #' @importFrom timeROC timeROC
 #'
 #' @param p Matrix with predicted probabilities for imputation i in columns (complete case analysis: one column)
-#' @param y Time to event outcome as Surv object (time,status), unrestricted followup. Note: if you enter a Surv() object here that is restricted to follow-up time, one cannot calculate AUC, it will result in NA values.
+#' @param y Time to event outcome as Surv object (time,status), unrestricted followup. Note: if one enters a Surv() object here where follow-up time is restricted to the horizon, time-dependent AUC cannot be calculated, and it will return NA values.
 #' @param g Number of risk groups; default=5
 #' @param time Time point at which to evaluate the predicted probabilities, default=NULL (not entered), the maximum time point will be taken. Please note that AUC doesn't compute at maximum follow-up time, you can use show.metrics to omit these results from the plot.
 #' @param main Plot label, default=""
@@ -30,7 +30,7 @@
 #' @param dist distribution, default=TRUE
 #' @param CI plot confidence interval, default=FALSE
 #' @param df degrees of freedom to compute confidence interval, default=3
-#' @param CI.metrics plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, Uno's C-index, and the area under the time-dependent ROC curve (AUC), default=FALSE.
+#' @param CI.metrics plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, Uno's C-index, and the area under the time-dependent ROC curve (AUC), default=FALSE. Note, the calculation of the CI of the AUC can take a long time.
 #' @param show.metrics TRUE/FALSE vector of length 6 indicating if plot should show (1) sample size, (2) calibration intercept, (3) calibration slope, (4) Harrell's C-index possibly corrected with optimism specified in optimism.C, (5) Uno's C-index, (6) the area under time-dependent ROC curve (AUC) as defined by Blanche et al., default=rep(TRUE, 6)
 #' @param optimism.C optimism-correction for Harrel's C-index in plot, default=0
 #'
