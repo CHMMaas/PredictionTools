@@ -22,7 +22,7 @@
 #' @importFrom timeROC timeROC
 #'
 #' @param p Matrix with predicted probabilities for imputation i in columns (complete case analysis: one column)
-#' @param y Time to event outcome as Surv object (time,status), unrestricted followup
+#' @param y Time to event outcome as Surv object (time,status), unrestricted followup. Note: if you enter a Surv() object here that is restricted to follow-up time, one cannot calculate AUC, it will result in NA values.
 #' @param g Number of risk groups; default=5
 #' @param time Time point at which to evaluate the predicted probabilities, default=NULL (not entered), the maximum time point will be taken. Please note that AUC doesn't compute at maximum follow-up time, you can use show.metrics to omit these results from the plot.
 #' @param main Plot label, default=""
@@ -379,26 +379,28 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
     f0	<-f0[j0]
     maxf <-max(f0)
     f0	<-(0.1*f0)/maxf
-    graphics::segments(bins0,line.bins,bins0,length.seg*f0+line.bins, col="grey")
+    graphics::segments(bins0, line.bins, bins0, length.seg*f0+line.bins, col="grey")
   }
 
   if (CI){
-    graphics::polygon(x=c(p.sm.mi,rev(p.sm.mi)),y=c(obs.sm.mi.lower,rev(obs.sm.mi.upper)),border = NA,col="Lightgray")
-    graphics::lines(p.sm.mi,obs.sm.mi,lwd=2,col="Darkgray")
+    graphics::polygon(x=c(p.sm.mi, rev(p.sm.mi)),
+                      y=c(obs.sm.mi.lower, rev(obs.sm.mi.upper)), border = NA,
+                      col="Lightgray")
+    graphics::lines(p.sm.mi, obs.sm.mi, lwd=2, col="Darkgray")
   }
 
-  graphics::lines(lim,lim)
-  graphics::abline(v=quants,col="darkgrey",lwd=1,lty=2)
+  graphics::lines(lim, lim)
+  graphics::abline(v=quants, col="darkgrey", lwd=1, lty=2)
 
-  graphics::segments(p.mi,obs.mi.lower,p.mi,obs.mi.upper)
-  graphics::points(p.mi,obs.mi,pch=20)
+  graphics::segments(p.mi, obs.mi.lower, p.mi, obs.mi.upper)
+  graphics::points(p.mi, obs.mi, pch=20)
 
-  int.mi<-Rubin.combine(int,int.se)
-  slope.mi<-Rubin.combine(slope,slope.se)
-  HarrellC.mi<-Rubin.combine(HarrellC,HarrellC.se)
-  UnoC.mi<-Rubin.combine(UnoC,UnoC.se)
+  int.mi<-Rubin.combine(int, int.se)
+  slope.mi<-Rubin.combine(slope, slope.se)
+  HarrellC.mi<-Rubin.combine(HarrellC, HarrellC.se)
+  UnoC.mi<-Rubin.combine(UnoC, UnoC.se)
   if(CI.metrics){
-    AUC.mi<-Rubin.combine(AUC,AUC.se)
+    AUC.mi<-Rubin.combine(AUC, AUC.se)
   } else{
     AUC.mi <- list()
     AUC.mi$est <- mean(AUC)
