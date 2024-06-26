@@ -16,6 +16,8 @@
 #' @importFrom graphics points
 #' @importFrom graphics polygon
 #' @importFrom graphics segments
+#' @importFrom mice mice
+#' @importFrom mice complete
 #' @importFrom stats qnorm
 #' @importFrom stats vcov
 #' @importFrom utils tail
@@ -28,7 +30,7 @@
 #' @param main Plot label, default=""
 #' @param lim limit, default=NULL
 #' @param dist distribution, default=TRUE
-#' @param CI plot confidence interval, default=FALSE
+#' @param smoothed.curve plot smoothed calibration curve with 95 percent confidence interval, default=FALSE
 #' @param df degrees of freedom to compute confidence interval, default=3
 #' @param CI.metrics plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, Uno's C-index, and the area under the time-dependent ROC curve (AUC), default=FALSE. Note, the calculation of the CI of the AUC can take a long time.
 #' @param show.metrics TRUE/FALSE vector of length 6 indicating if plot should show (1) sample size, (2) calibration intercept, (3) calibration slope, (4) Harrell's C-index possibly corrected with optimism specified in optimism.C, (5) Uno's C-index, (6) the area under time-dependent ROC curve (AUC) as defined by Blanche et al., default=rep(TRUE, 6)
@@ -218,7 +220,7 @@
 #'                              show.metrics=show.metrics,
 #'                              CI.metrics=CI.metrics)
 val.surv.mi<-function(p, y, g=5, time=NULL,
-                      main="", lim=c(0,1), dist=TRUE, CI=FALSE, df=3,
+                      main="", lim=c(0,1), dist=TRUE, smoothed.curve=FALSE, df=3,
                       CI.metrics=FALSE, show.metrics=rep(TRUE, 6),
                       optimism.C=0){
   stopifnot("p must be numeric" = is.numeric(p))
@@ -227,7 +229,7 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
   stopifnot("optimism.C must be numeric" = is.numeric(optimism.C))
 
   stopifnot("dist must be a boolean (TRUE or FALSE)" = isTRUE(dist)|isFALSE(dist))
-  stopifnot("CI must be a boolean (TRUE or FALSE)" = isTRUE(CI)|isFALSE(CI))
+  stopifnot("smoothed.curve must be a boolean (TRUE or FALSE)" = isTRUE(smoothed.curve)|isFALSE(smoothed.curve))
   stopifnot("CI.metrics must be a boolean (TRUE or FALSE)" = isTRUE(CI.metrics)|isFALSE(CI.metrics))
 
   stopifnot("p must be a vector or matrix" = is.vector(p) | is.matrix(p))
@@ -269,6 +271,12 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
     lp.val<-lp[,i]
     f.val<-survival::coxph(y~lp.val)
     f.val.offset<-survival::coxph(y~offset(lp.val))
+
+    # smoothed calibration curve
+    f.val.rcs<-cph(y~rcs(lp.val,5),x=TRUE,y=TRUE)
+    surv.sm<-Predict(f.val.rcs,lp.val=lp.range,conf.int = 0.95, conf.type = "simultaneous",time=max(y[,1]))
+    lp.sm[,i]<-log(-log(surv.sm$yhat))
+    lp.sm.se[,i]<-(log(-log(surv.sm$upper))-log(-log(surv.sm$lower)))/(qnorm(.975)-qnorm(.025))
 
     if (show.metrics[2]){
       # calibration intercept
@@ -346,6 +354,12 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
     obs.mi.upper[j]<-1-exp(-exp(RC$est+stats::qnorm(.975)*RC$se))
   }
 
+  graphics::par(mar = c(5,5,2,1))
+  graphics::par(mar = c(5,5,2,1))
+  plot(lim,lim,type='l',xlab="Predicted probability",ylab="Observed frequency",
+       main=main,lwd=1,bty='n')
+
+  # smooth curve
   p.sm.mi<-1-exp(-exp(lp.range))
   obs.sm.mi<-rep(0,101)
   obs.sm.mi.lower<-rep(0,101)
@@ -356,11 +370,12 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
     obs.sm.mi.lower[j]<-1-exp(-exp(RC$est+stats::qnorm(.025)*RC$se))
     obs.sm.mi.upper[j]<-1-exp(-exp(RC$est+stats::qnorm(.975)*RC$se))
   }
-
-  graphics::par(mar = c(5,5,2,1))
-
-  graphics::par(mar = c(5,5,2,1))
-  plot(lim,lim,type='l',xlab="Predicted probability",ylab="Observed frequency",main=main,lwd=1,bty='n')
+  if (smoothed.curve){
+    graphics::polygon(x=c(p.sm.mi, rev(p.sm.mi)),
+                      y=c(obs.sm.mi.lower, rev(obs.sm.mi.upper)), border = NA,
+                      col="Lightgray")
+    graphics::lines(p.sm.mi, obs.sm.mi, lwd=2, col="Darkgray")
+  }
 
   if (dist){
     line.bins <- 0.0
@@ -380,13 +395,6 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
     maxf <-max(f0)
     f0	<-(0.1*f0)/maxf
     graphics::segments(bins0, line.bins, bins0, length.seg*f0+line.bins, col="grey")
-  }
-
-  if (CI){
-    graphics::polygon(x=c(p.sm.mi, rev(p.sm.mi)),
-                      y=c(obs.sm.mi.lower, rev(obs.sm.mi.upper)), border = NA,
-                      col="Lightgray")
-    graphics::lines(p.sm.mi, obs.sm.mi, lwd=2, col="Darkgray")
   }
 
   graphics::lines(lim, lim)

@@ -12,7 +12,7 @@ val.surv.mi(
   main = "",
   lim = c(0, 1),
   dist = TRUE,
-  CI = FALSE,
+  smoothed.curve = FALSE,
   df = 3,
   CI.metrics = FALSE,
   show.metrics = rep(TRUE, 6),
@@ -34,7 +34,7 @@ val.surv.mi(
 
 \item{dist}{distribution, default=TRUE}
 
-\item{CI}{plot confidence interval, default=FALSE}
+\item{smoothed.curve}{plot smoothed calibration curve with 95 percent confidence interval, default=FALSE}
 
 \item{df}{degrees of freedom to compute confidence interval, default=3}
 
