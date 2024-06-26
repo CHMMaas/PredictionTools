@@ -32,6 +32,9 @@ Update 6 March 2024: improved speed
 Update 27 March 2024: n.iter argument removed
 1. Standard error of Uno's C-index is not calculated by bootstrapping anymore, so the argument n.iter is removed
 
+Update 26 June 2024: smoothed calibration curve added
+1. When the option smoothed.curve is set to TRUE, a smoothed calibration curve is plotted
+
 # Load
 library(PredictionTools)
 
