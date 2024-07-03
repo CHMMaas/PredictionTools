@@ -32,9 +32,10 @@
 #' @param dist distribution, default=TRUE
 #' @param smoothed.curve plot smoothed calibration curve with 95 percent confidence interval, default=FALSE
 #' @param df degrees of freedom to compute confidence interval, default=3
-#' @param CI.metrics plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, Uno's C-index, and the area under the time-dependent ROC curve (AUC), default=FALSE. Note, the calculation of the CI of the AUC can take a long time.
+#' @param CI.metrics plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, Uno's C-index, and the area under the time-dependent ROC curve (AUC), default=FALSE.
 #' @param show.metrics TRUE/FALSE vector of length 6 indicating if plot should show (1) sample size, (2) calibration intercept, (3) calibration slope, (4) Harrell's C-index possibly corrected with optimism specified in optimism.C, (5) Uno's C-index, (6) the area under time-dependent ROC curve (AUC) as defined by Blanche et al., default=rep(TRUE, 6)
 #' @param optimism.C optimism-correction for Harrel's C-index in plot, default=0
+#' @param n.sim number of simulations for computing simultaneous confidence bands for the time-dependent AUC, which heavily influence computation time, default=2000
 #'
 #' @return The output of the val_surv_mi function is a "list" with the following components.
 #'
@@ -222,7 +223,7 @@
 val.surv.mi<-function(p, y, g=5, time=NULL,
                       main="", lim=c(0,1), dist=TRUE, smoothed.curve=FALSE, df=3,
                       CI.metrics=FALSE, show.metrics=rep(TRUE, 6),
-                      optimism.C=0){
+                      optimism.C=0, n.sim=2000){
   stopifnot("p must be numeric" = is.numeric(p))
   stopifnot("y must be numeric" = is.numeric(y))
   stopifnot("g must be numeric" = is.numeric(g))
@@ -324,7 +325,7 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
                                         times=time,
                                         cause=1,
                                         iid=TRUE)
-        AUC.CI <- stats::confint(AUC.i)
+        AUC.CI <- stats::confint(AUC.i, n.sim=n.sim)
         AUC.se[i] <- as.numeric((as.numeric(AUC.CI$CI_AUC[2])/100-as.numeric(AUC.i$AUC[2]))/AUC.CI$C.alpha)
       }
     }
