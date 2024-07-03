@@ -219,7 +219,8 @@
 #' PredictionTools::val.surv.mi(p=as.matrix(p), y=S,
 #'                              g=g, main=main, time=horizon,
 #'                              show.metrics=show.metrics,
-#'                              CI.metrics=CI.metrics)
+#'                              CI.metrics=CI.metrics,
+#'                              n.sim=200)
 val.surv.mi<-function(p, y, g=5, time=NULL,
                       main="", lim=c(0,1), dist=TRUE, smoothed.curve=FALSE, df=3,
                       CI.metrics=FALSE, show.metrics=rep(TRUE, 6),
