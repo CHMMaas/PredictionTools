@@ -35,6 +35,9 @@ Update 27 March 2024: n.iter argument removed
 Update 26 June 2024: smoothed calibration curve added
 1. When the option smoothed.curve is set to TRUE, a smoothed calibration curve is plotted
 
+Update 3 June 2024: n.sim argument added
+1. Added argument to change the number of simulations used to compute the confidence interval of the time-dependent AUC. Note, computation of 95% CI for the time-dependent AUC is very slow if n.sim is large (2000).
+
 # Load
 library(PredictionTools)
 
