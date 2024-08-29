@@ -192,7 +192,7 @@
 #' p <- c()
 #' for (i in 1:m){
 #'  # fit model
-#'   model.i <- cph(S.5 ~ sex + age + bili + ascites + hepato,
+#'   model.i <- rms::cph(S.5 ~ sex + age + bili + ascites + hepato,
 #'                  data=mice::complete(imp, i),
 #'                  x=TRUE, y=TRUE, se.fit=TRUE)
 #'
@@ -265,20 +265,11 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
 
   p.groups<-array(rep(0,g*m.imp.val),dim=c(m.imp.val,g),dimnames=list(1:m.imp.val,1:g))
   y.groups<-array(rep(0,2*g*m.imp.val),dim=c(m.imp.val,g,2),dimnames=list(1:m.imp.val,1:g,c("obs","se")))
-  lp.range<-min(lp)+0:100*(max(lp)-min(lp))/100
-  lp.sm<-array(rep(0,101*m.imp.val),dim=c(101,m.imp.val),dimnames=list(1:101,1:m.imp.val))
-  lp.sm.se<-lp.sm
 
   for (i in 1:m.imp.val){
     lp.val<-lp[,i]
     f.val<-survival::coxph(y~lp.val)
     f.val.offset<-survival::coxph(y~offset(lp.val))
-
-    # smoothed calibration curve
-    f.val.rcs<-cph(y~rcs(lp.val,5),x=TRUE,y=TRUE)
-    surv.sm<-Predict(f.val.rcs,lp.val=lp.range,conf.int = 0.95, conf.type = "simultaneous",time=max(y[,1]))
-    lp.sm[,i]<-log(-log(surv.sm$yhat))
-    lp.sm.se[,i]<-(log(-log(surv.sm$upper))-log(-log(surv.sm$lower)))/(qnorm(.975)-qnorm(.025))
 
     if (show.metrics[2]){
       # calibration intercept
@@ -361,18 +352,31 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
   plot(lim,lim,type='l',xlab="Predicted probability",ylab="Observed frequency",
        main=main,lwd=1,bty='n')
 
-  # smooth curve
-  p.sm.mi<-1-exp(-exp(lp.range))
-  obs.sm.mi<-rep(0,101)
-  obs.sm.mi.lower<-rep(0,101)
-  obs.sm.mi.upper<-rep(0,101)
-  for (j in 1:101){
-    RC<-Rubin.combine(lp.sm[j,],lp.sm.se[j,])
-    obs.sm.mi[j]<-1-exp(-exp(RC$est))
-    obs.sm.mi.lower[j]<-1-exp(-exp(RC$est+stats::qnorm(.025)*RC$se))
-    obs.sm.mi.upper[j]<-1-exp(-exp(RC$est+stats::qnorm(.975)*RC$se))
-  }
   if (smoothed.curve){
+    # lp of smoothed calibration curve of lp.range
+    lp.range<-min(lp)+0:100*(max(lp)-min(lp))/100
+    lp.sm<-array(rep(0,101*m.imp.val),dim=c(101,m.imp.val),dimnames=list(1:101,1:m.imp.val))
+    lp.sm.se<-lp.sm
+    for (i in 1:m.imp.val){
+      f.val.rcs<-rms::cph(y~rms::rcs(lp.val,5),x=TRUE,y=TRUE)
+      surv.sm<-rms::Predict(f.val.rcs,lp.val=lp.range,conf.int = 0.95, conf.type = "simultaneous",time=max(y[,1]))
+      lp.sm[,i]<-log(-log(surv.sm$yhat))
+      lp.sm.se[,i]<-(log(-log(surv.sm$upper))-log(-log(surv.sm$lower)))/(qnorm(.975)-qnorm(.025))
+    }
+
+    # predicted and observed of smoothed curve
+    p.sm.mi<-1-exp(-exp(lp.range))
+    obs.sm.mi<-rep(0,101)
+    obs.sm.mi.lower<-rep(0,101)
+    obs.sm.mi.upper<-rep(0,101)
+    for (j in 1:101){
+      RC<-Rubin.combine(lp.sm[j,],lp.sm.se[j,])
+      obs.sm.mi[j]<-1-exp(-exp(RC$est))
+      obs.sm.mi.lower[j]<-1-exp(-exp(RC$est+stats::qnorm(.025)*RC$se))
+      obs.sm.mi.upper[j]<-1-exp(-exp(RC$est+stats::qnorm(.975)*RC$se))
+    }
+
+    # add to plot
     graphics::polygon(x=c(p.sm.mi, rev(p.sm.mi)),
                       y=c(obs.sm.mi.lower, rev(obs.sm.mi.upper)), border = NA,
                       col="Lightgray")

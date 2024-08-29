@@ -203,7 +203,7 @@ S.5[S[,1]>horizon, 2] <- 0       # if time is more than horizon, censor
 p <- c()
 for (i in 1:m){
  # fit model
-  model.i <- cph(S.5 ~ sex + age + bili + ascites + hepato,
+  model.i <- rms::cph(S.5 ~ sex + age + bili + ascites + hepato,
                  data=mice::complete(imp, i),
                  x=TRUE, y=TRUE, se.fit=TRUE)
 
