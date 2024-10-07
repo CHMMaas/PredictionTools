@@ -40,6 +40,7 @@ Update 3 June 2024: n.sim argument added
 
 Update 7 October 2024: calculate.ARD.dRMST added
 1. Added function to calculate absolute risk difference (ARD) and difference in restricted mean survival time (dRMST) for time-to-event data
+2. tdROC function is now made available even if the Surv-object is restricted to a certain time horizon
 
 # Load
 library(PredictionTools)
