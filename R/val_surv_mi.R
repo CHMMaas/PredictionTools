@@ -24,7 +24,7 @@
 #' @importFrom timeROC timeROC
 #'
 #' @param p Matrix with predicted probabilities for imputation i in columns (complete case analysis: one column)
-#' @param y Time to event outcome as Surv object (time,status), unrestricted followup. Note: if one enters a Surv() object here where follow-up time is restricted to the horizon, time-dependent AUC cannot be calculated, and it will return NA values.
+#' @param y Time to event outcome as Surv object (time,status), either unrestricted or restricted follow-up
 #' @param g Number of risk groups; default=5
 #' @param time Time point at which to evaluate the predicted probabilities, default=NULL (not entered), the maximum time point will be taken. Please note that AUC doesn't compute at maximum follow-up time, you can use show.metrics to omit these results from the plot.
 #' @param main Plot label, default=""

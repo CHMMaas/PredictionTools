@@ -23,7 +23,7 @@ val.surv.mi(
 \arguments{
 \item{p}{Matrix with predicted probabilities for imputation i in columns (complete case analysis: one column)}
 
-\item{y}{Time to event outcome as Surv object (time,status), unrestricted followup. Note: if one enters a Surv() object here where follow-up time is restricted to the horizon, time-dependent AUC cannot be calculated, and it will return NA values.}
+\item{y}{Time to event outcome as Surv object (time,status), either unrestricted or restricted follow-up}
 
 \item{g}{Number of risk groups; default=5}
 
