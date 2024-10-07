@@ -38,6 +38,9 @@ Update 26 June 2024: smoothed calibration curve added
 Update 3 June 2024: n.sim argument added
 1. Added argument to change the number of simulations used to compute the confidence interval of the time-dependent AUC. Note, computation of 95% CI for the time-dependent AUC is very slow if n.sim is large (2000).
 
+Update 7 October 2024: calculate.ARD.dRMST added
+1. Added function to calculate absolute risk difference (ARD) and difference in restricted mean survival time (dRMST) for time-to-event data
+
 # Load
 library(PredictionTools)
 
