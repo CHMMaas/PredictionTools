@@ -220,7 +220,7 @@
 #'                              g=g, main=main, time=horizon,
 #'                              show.metrics=show.metrics,
 #'                              CI.metrics=CI.metrics,
-#'                              n.sim=200)
+#'                              n.sim=100)
 val.surv.mi<-function(p, y, g=5, time=NULL,
                       main="", lim=c(0,1), dist=TRUE, smoothed.curve=FALSE, df=3,
                       CI.metrics=FALSE, show.metrics=rep(TRUE, 6),
@@ -301,15 +301,13 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
     }
 
     if (show.metrics[6]){
-      # Time-dependent ROC
-      AUC[i] <- timeROC::timeROC(T=y.orig[, 1],
-                                   delta=y.orig[, 2],
-                                   marker=lp.val,
-                                   times=time,
-                                   cause=1,
-                                   iid=FALSE)$AUC[2]
+      # if horizon is same as maximum, add small time
+      max.time <- y.orig[,1]==time
+      if (sum(max.time)>0){
+        y.orig[max.time, 1] <- y.orig[max.time, 1] + 0.01
+      }
 
-      # time-dependent ROC SE
+      # time-dependent ROC with CI
       if (CI.metrics){
         AUC.i <- timeROC::timeROC(T=y.orig[, 1],
                                         delta=y.orig[, 2],
@@ -317,8 +315,17 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
                                         times=time,
                                         cause=1,
                                         iid=TRUE)
+        AUC[i] <- AUC.i$AUC[2]
         AUC.CI <- stats::confint(AUC.i, n.sim=n.sim)
         AUC.se[i] <- as.numeric((as.numeric(AUC.CI$CI_AUC[2])/100-as.numeric(AUC.i$AUC[2]))/AUC.CI$C.alpha)
+      } else{
+        # Time-dependent ROC without CI
+        AUC[i] <- timeROC::timeROC(T=y.orig[, 1],
+                                   delta=y.orig[, 2],
+                                   marker=lp.val,
+                                   times=time,
+                                   cause=1,
+                                   iid=FALSE)$AUC[2]
       }
     }
 

@@ -231,5 +231,5 @@ PredictionTools::val.surv.mi(p=as.matrix(p), y=S,
                              g=g, main=main, time=horizon,
                              show.metrics=show.metrics,
                              CI.metrics=CI.metrics,
-                             n.sim=200)
+                             n.sim=100)
 }
