@@ -44,6 +44,9 @@ Update 7 October 2024: calculate.ARD.dRMST added
 
 Update 10 October 2024: rename calculate.ARD.dRMST into calculate.RD.dRMST
 
+Update 9 December 2024:
+1. Smoothed curve updated
+
 # Load
 library(PredictionTools)
 
