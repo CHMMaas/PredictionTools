@@ -442,7 +442,6 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
     AUC.mi$se <- 0
   }
 
-  print(ICI)
   legend.text <- c(paste("N =",format(n,big.mark=",")),
                    paste0("Intercept = ",format(round(int.mi$est,2),nsmall=2),
                           ifelse(CI.metrics,
