@@ -213,7 +213,7 @@
 #' # internally validate predictions
 #' g <- 4
 #' main <- paste("Calibration plot for predictions at time",  horizon)
-#' show.metrics <- rep(TRUE, 6)
+#' show.metrics <- rep(TRUE, 7)
 #' CI.metrics <- TRUE
 #' PredictionTools::val.surv.mi(p=as.matrix(p), y=S,
 #'                              g=g, time=horizon,
@@ -221,6 +221,7 @@
 #'                              dist=TRUE, smoothed.curve=TRUE,
 #'                              CI.metrics=CI.metrics,
 #'                              show.metrics=show.metrics,
+#'                              optimism.C=0,
 #'                              n.sim=100)
 val.surv.mi<-function(p, y, g=5, time=NULL,
                       main="", lim=c(0,1), dist=TRUE, smoothed.curve=FALSE,
@@ -257,6 +258,7 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
   int.se<-rep(0,m.imp.val)
   slope<-rep(0,m.imp.val)
   slope.se<-rep(0,m.imp.val)
+  ICI<-rep(0,m.imp.val)
   HarrellC<-rep(0,m.imp.val)
   HarrellC.se<-rep(0,m.imp.val)
   UnoC<-rep(0, m.imp.val)
@@ -288,20 +290,30 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
     }
 
     if (show.metrics[4]){
+      # Integrated Calibration Index
+      f.val.rcs<-rms::cph(y~rms::rcs(lp.val,5),x=TRUE,y=TRUE)
+      surv.sm<-rms::Predict(f.val.rcs,lp.val=lp.val,time=max(y[,1]))
+      lp.sm<-log(-log(surv.sm$yhat))
+      obs.sm.mi <- 1-exp(-exp(lp.sm))
+      p.sm.mi<-1-exp(-exp(lp.val))
+      ICI[i] <- mean(abs(p.sm.mi - obs.sm.mi))
+    }
+
+    if (show.metrics[5]){
       # Harrell's C-index
       rc.H<-survival::concordance(f.val, timewt="n")
       HarrellC[i]<-rc.H$concordance
       HarrellC.se[i]<-sqrt(rc.H$var)
     }
 
-    if (show.metrics[5]){
+    if (show.metrics[6]){
       # Uno's C-index
       rc.U<-survival::concordance(f.val, timewt="n/G2")
       UnoC[i]<-rc.U$concordance
       UnoC.se[i]<-sqrt(rc.U$var)
     }
 
-    if (show.metrics[6]){
+    if (show.metrics[7]){
       # if horizon is same as maximum, add small time
       max.time <- y.orig[,1]==time
       if (sum(max.time)>0){
@@ -430,6 +442,7 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
     AUC.mi$se <- 0
   }
 
+  print(ICI)
   legend.text <- c(paste("N =",format(n,big.mark=",")),
                    paste0("Intercept = ",format(round(int.mi$est,2),nsmall=2),
                           ifelse(CI.metrics,
@@ -441,6 +454,7 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
                                  paste0(" [", format(round(slope.mi$est+stats::qnorm(.025)*slope.mi$se, 2), nsmall=2),
                                         "; ", format(round(slope.mi$est+stats::qnorm(.975)*slope.mi$se, 2), nsmall=2), "]"),
                                  "")),
+                   paste0("ICI = ",format(round(mean(ICI),2),nsmall=2)),
                    paste0("Harrell's C-index = ",format(round(HarrellC.mi$est-optimism.C,2),nsmall=2),
                           ifelse(CI.metrics,
                                  paste0(" [", format(round(HarrellC.mi$est+stats::qnorm(.025)*HarrellC.mi$se-optimism.C, 2), nsmall=2),
@@ -473,6 +487,7 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
               slope=slope.mi$est,
               slope.lower=slope.mi$est+stats::qnorm(.025)*slope.mi$se,
               slope.upper=slope.mi$est+stats::qnorm(.975)*slope.mi$se,
+              ICI=ICI,
               HarrellC=HarrellC.mi$est,
               HarrellC.se=HarrellC.mi$se,
               HarrellC.lower=HarrellC.mi$est+stats::qnorm(.025)*HarrellC.mi$se,

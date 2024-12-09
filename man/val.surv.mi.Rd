@@ -222,7 +222,7 @@ for (i in 1:m){
 # internally validate predictions
 g <- 4
 main <- paste("Calibration plot for predictions at time",  horizon)
-show.metrics <- rep(TRUE, 6)
+show.metrics <- rep(TRUE, 7)
 CI.metrics <- TRUE
 PredictionTools::val.surv.mi(p=as.matrix(p), y=S,
                              g=g, time=horizon,
@@ -230,5 +230,6 @@ PredictionTools::val.surv.mi(p=as.matrix(p), y=S,
                              dist=TRUE, smoothed.curve=TRUE,
                              CI.metrics=CI.metrics,
                              show.metrics=show.metrics,
+                             optimism.C=0,
                              n.sim=100)
 }
