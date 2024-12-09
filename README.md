@@ -46,6 +46,7 @@ Update 10 October 2024: rename calculate.ARD.dRMST into calculate.RD.dRMST
 
 Update 9 December 2024:
 1. Smoothed curve updated
+2. Added Integrated Calibration Index (https://onlinelibrary.wiley.com/doi/10.1002/sim.8570)
 
 # Load
 library(PredictionTools)
