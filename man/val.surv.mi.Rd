@@ -13,7 +13,6 @@ val.surv.mi(
   lim = c(0, 1),
   dist = TRUE,
   smoothed.curve = FALSE,
-  df = 3,
   CI.metrics = FALSE,
   show.metrics = rep(TRUE, 6),
   optimism.C = 0,
@@ -36,8 +35,6 @@ val.surv.mi(
 \item{dist}{distribution, default=TRUE}
 
 \item{smoothed.curve}{plot smoothed calibration curve with 95 percent confidence interval, default=FALSE}
-
-\item{df}{degrees of freedom to compute confidence interval, default=3}
 
 \item{CI.metrics}{plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, Uno's C-index, and the area under the time-dependent ROC curve (AUC), default=FALSE.}
 
@@ -228,8 +225,10 @@ main <- paste("Calibration plot for predictions at time",  horizon)
 show.metrics <- rep(TRUE, 6)
 CI.metrics <- TRUE
 PredictionTools::val.surv.mi(p=as.matrix(p), y=S,
-                             g=g, main=main, time=horizon,
-                             show.metrics=show.metrics,
+                             g=g, time=horizon,
+                             main=main, lim=c(0, 1),
+                             dist=TRUE, smoothed.curve=TRUE,
                              CI.metrics=CI.metrics,
+                             show.metrics=show.metrics,
                              n.sim=100)
 }

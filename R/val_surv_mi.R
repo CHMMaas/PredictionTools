@@ -31,7 +31,6 @@
 #' @param lim limit, default=NULL
 #' @param dist distribution, default=TRUE
 #' @param smoothed.curve plot smoothed calibration curve with 95 percent confidence interval, default=FALSE
-#' @param df degrees of freedom to compute confidence interval, default=3
 #' @param CI.metrics plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, Uno's C-index, and the area under the time-dependent ROC curve (AUC), default=FALSE.
 #' @param show.metrics TRUE/FALSE vector of length 6 indicating if plot should show (1) sample size, (2) calibration intercept, (3) calibration slope, (4) Harrell's C-index possibly corrected with optimism specified in optimism.C, (5) Uno's C-index, (6) the area under time-dependent ROC curve (AUC) as defined by Blanche et al., default=rep(TRUE, 6)
 #' @param optimism.C optimism-correction for Harrel's C-index in plot, default=0
@@ -217,12 +216,14 @@
 #' show.metrics <- rep(TRUE, 6)
 #' CI.metrics <- TRUE
 #' PredictionTools::val.surv.mi(p=as.matrix(p), y=S,
-#'                              g=g, main=main, time=horizon,
-#'                              show.metrics=show.metrics,
+#'                              g=g, time=horizon,
+#'                              main=main, lim=c(0, 1),
+#'                              dist=TRUE, smoothed.curve=TRUE,
 #'                              CI.metrics=CI.metrics,
+#'                              show.metrics=show.metrics,
 #'                              n.sim=100)
 val.surv.mi<-function(p, y, g=5, time=NULL,
-                      main="", lim=c(0,1), dist=TRUE, smoothed.curve=FALSE, df=3,
+                      main="", lim=c(0,1), dist=TRUE, smoothed.curve=FALSE,
                       CI.metrics=FALSE, show.metrics=rep(TRUE, 6),
                       optimism.C=0, n.sim=2000){
   stopifnot("p must be numeric" = is.numeric(p))
@@ -365,6 +366,7 @@ val.surv.mi<-function(p, y, g=5, time=NULL,
     lp.sm<-array(rep(0,101*m.imp.val),dim=c(101,m.imp.val),dimnames=list(1:101,1:m.imp.val))
     lp.sm.se<-lp.sm
     for (i in 1:m.imp.val){
+      lp.val<-lp[,i]
       f.val.rcs<-rms::cph(y~rms::rcs(lp.val,5),x=TRUE,y=TRUE)
       surv.sm<-rms::Predict(f.val.rcs,lp.val=lp.range,conf.int = 0.95, conf.type = "simultaneous",time=max(y[,1]))
       lp.sm[,i]<-log(-log(surv.sm$yhat))
