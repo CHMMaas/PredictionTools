@@ -32,7 +32,7 @@
 #' @param dist distribution, default=TRUE
 #' @param smoothed.curve plot smoothed calibration curve with 95 percent confidence interval, default=FALSE
 #' @param CI.metrics plot confidence intervals of calibration intercept, calibration slope, and Harrell's C-index, Uno's C-index, and the area under the time-dependent ROC curve (AUC), default=FALSE.
-#' @param show.metrics TRUE/FALSE vector of length 6 indicating if plot should show (1) sample size, (2) calibration intercept, (3) calibration slope, (4) Harrell's C-index possibly corrected with optimism specified in optimism.C, (5) Uno's C-index, (6) the area under time-dependent ROC curve (AUC) as defined by Blanche et al., default=rep(TRUE, 6)
+#' @param show.metrics TRUE/FALSE vector of length 6 indicating if plot should show (1) sample size, (2) calibration intercept, (3) calibration slope, (4) Integrated Calibration Index, (5) Harrell's C-index possibly corrected with optimism specified in optimism.C, (6) Uno's C-index, (7) the area under time-dependent ROC curve (AUC) as defined by Blanche et al., default=rep(TRUE, 7)
 #' @param optimism.C optimism-correction for Harrel's C-index in plot, default=0
 #' @param n.sim number of simulations for computing simultaneous confidence bands for the time-dependent AUC, which heavily influence computation time, default=2000
 #'
@@ -225,7 +225,7 @@
 #'                              n.sim=100)
 val.surv.mi<-function(p, y, g=5, time=NULL,
                       main="", lim=c(0,1), dist=TRUE, smoothed.curve=FALSE,
-                      CI.metrics=FALSE, show.metrics=rep(TRUE, 6),
+                      CI.metrics=FALSE, show.metrics=rep(TRUE, 7),
                       optimism.C=0, n.sim=2000){
   stopifnot("p must be numeric" = is.numeric(p))
   stopifnot("y must be numeric" = is.numeric(y))
