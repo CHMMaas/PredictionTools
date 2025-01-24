@@ -112,6 +112,11 @@ slope.upper
 upper bound of 95\% confidence interval of slope.
 
 
+ICI
+
+Integrated Calibration Curve.
+
+
 HarrellC
 
 Harrell's C-index, uncorrected for optimism.
